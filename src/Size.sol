@@ -250,7 +250,6 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     ///     - uint256 deadline: The maximum timestamp for the transaction to be executed
     ///     - uint256 maxAPR: The maximum APR the caller is willing to accept
     ///     - bool exactAmountIn: this flag indicates if the amount argument represents either credit (true) or cash (false)
-    function sellCreditMarket(SellCreditMarketParams calldata params) external payable;
     function sellCreditMarket(SellCreditMarketParams memory params) external payable override(ISize) whenNotPaused {
         state.validateSellCreditMarket(params);
         uint256 amount = state.executeSellCreditMarket(params);
