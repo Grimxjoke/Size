@@ -61,6 +61,7 @@ library Liquidate {
         LiquidateParams calldata params,
         uint256 liquidatorProfitCollateralToken
     ) external pure {
+        //audit-info Who is setting the minimumCollateralProfit ? 
         if (liquidatorProfitCollateralToken < params.minimumCollateralProfit) {
             revert Errors.LIQUIDATE_PROFIT_BELOW_MINIMUM_COLLATERAL_PROFIT(
                 liquidatorProfitCollateralToken, params.minimumCollateralProfit
@@ -100,6 +101,8 @@ library Liquidate {
             liquidatorProfitCollateralToken = debtInCollateralToken + liquidatorReward;
 
             // split the remaining collateral between the protocol and the borrower, capped by the crLiquidation
+            //audit No Underflow possible here ? 
+            //audit Can User lower the assignedCollateral to make the liquidate function revert ? 
             uint256 collateralRemainder = assignedCollateral - liquidatorProfitCollateralToken;
 
             // cap the collateral remainder to the liquidation collateral ratio

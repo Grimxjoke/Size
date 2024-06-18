@@ -47,6 +47,8 @@ contract NonTransferrableToken is Ownable, ERC20 {
         return spender == owner() ? type(uint256).max : 0;
     }
 
+
+    //audit No approve function is working ? 
     function approve(address, uint256) public virtual override returns (bool) {
         revert Errors.NOT_SUPPORTED();
     }

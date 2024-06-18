@@ -33,19 +33,30 @@ library Deposit {
     using DepositTokenLibrary for State;
     using CapsLibrary for State;
 
-    function validateDeposit(State storage state, DepositParams calldata params) external view {
+    function validateDeposit(
+        State storage state,
+        DepositParams calldata params
+    ) external view {
         // validate msg.sender
         // N/A
 
         // validate msg.value
-        if (msg.value != 0 && (msg.value != params.amount || params.token != address(state.data.weth))) {
+        //audit-ok
+        if (
+            msg.value != 0 &&
+            (msg.value != params.amount ||
+                params.token != address(state.data.weth))
+        ) {
             revert Errors.INVALID_MSG_VALUE(msg.value);
         }
 
         // validate token
+        //audit-ok The token should be either the collateral or the Borrow
+        //note To check if both token have only one entry point (should be) check this solodit issue : 
+        //note  https://solodit.xyz/issues/anyone-can-steal-money-from-other-suppliers-in-tusd-market-by-creating-negative-interest-rates-openzeppelin-compound-comprehensive-protocol-audit-markdown
         if (
-            params.token != address(state.data.underlyingCollateralToken)
-                && params.token != address(state.data.underlyingBorrowToken)
+            params.token != address(state.data.underlyingCollateralToken) &&
+            params.token != address(state.data.underlyingBorrowToken)
         ) {
             revert Errors.INVALID_TOKEN(params.token);
         }
@@ -61,25 +72,35 @@ library Deposit {
         }
     }
 
-    function executeDeposit(State storage state, DepositParams calldata params) public {
+    function executeDeposit(
+        State storage state,
+        DepositParams calldata params
+    ) public {
         address from = msg.sender;
         uint256 amount = params.amount;
         if (msg.value > 0) {
             // do not trust msg.value (see `Multicall.sol`)
+            //audit WTF the amount that the user is suppose to deposit is the amount of this address? 
+            //audit Does the User has to deposit ETH to this address first and then used 
             amount = address(this).balance;
-            // slither-disable-next-line arbitrary-send-eth
+
             state.data.weth.deposit{value: amount}();
             state.data.weth.forceApprove(address(this), amount);
             from = address(this);
         }
 
         if (params.token == address(state.data.underlyingBorrowToken)) {
-            state.depositUnderlyingBorrowTokenToVariablePool(from, params.to, amount);
+            state.depositUnderlyingBorrowTokenToVariablePool(
+                from,
+                params.to,
+                amount
+            );
             // borrow aToken cap is not validated in multicall,
             //   since users must be able to deposit more tokens to repay debt
             if (!state.data.isMulticall) {
                 state.validateBorrowATokenCap();
             }
+        //audit Any check to be sure that the token is the underlying token ? 
         } else {
             state.depositUnderlyingCollateralToken(from, params.to, amount);
         }

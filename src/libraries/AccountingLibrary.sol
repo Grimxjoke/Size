@@ -23,6 +23,7 @@ library AccountingLibrary {
     /// @param state The state object
     /// @param debtTokenAmount The amount of debt tokens
     /// @return collateralTokenAmount The amount of collateral tokens
+    //audit-info Is this calculation correct? Rounding up vs Rounding down
     function debtTokenAmountToCollateralTokenAmount(State storage state, uint256 debtTokenAmount)
         internal
         view
@@ -43,7 +44,7 @@ library AccountingLibrary {
         DebtPosition storage debtPosition = state.getDebtPosition(debtPositionId);
 
         state.data.debtToken.burn(debtPosition.borrower, repayAmount);
-        debtPosition.futureValue -= repayAmount;
+        debtPosition.futureValue -= repayAmount; //audit Could it underflow ? 
 
         emit Events.UpdateDebtPosition(
             debtPositionId, debtPosition.borrower, debtPosition.futureValue, debtPosition.liquidityIndexAtRepayment

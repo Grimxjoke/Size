@@ -19,6 +19,7 @@ library RiskLibrary {
     /// @param state The state
     /// @param credit The remaining credit
     function validateMinimumCredit(State storage state, uint256 credit) public view {
+        //audit Why check if credit > 0 when credit should be > state.riskConfig.minimumCreditBorrowAToken?
         if (0 < credit && credit < state.riskConfig.minimumCreditBorrowAToken) {
             revert Errors.CREDIT_LOWER_THAN_MINIMUM_CREDIT(credit, state.riskConfig.minimumCreditBorrowAToken);
         }

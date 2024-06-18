@@ -36,6 +36,7 @@ library SelfLiquidate {
         DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
 
         // validate creditPositionId
+        //audit How could it be not Self Liquidable ? 
         if (!state.isCreditPositionSelfLiquidatable(params.creditPositionId)) {
             revert Errors.LOAN_NOT_SELF_LIQUIDATABLE(
                 params.creditPositionId,
@@ -43,6 +44,8 @@ library SelfLiquidate {
                 state.getLoanStatus(params.creditPositionId)
             );
         }
+
+        //audit So CR should be lower than Percent (1e18), why ? 
         if (state.collateralRatio(debtPosition.borrower) >= PERCENT) {
             revert Errors.LIQUIDATION_NOT_AT_LOSS(params.creditPositionId, state.collateralRatio(debtPosition.borrower));
         }

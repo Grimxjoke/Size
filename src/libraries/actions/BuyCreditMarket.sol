@@ -64,6 +64,7 @@ library BuyCreditMarket {
         } else {
             CreditPosition storage creditPosition = state.getCreditPosition(params.creditPositionId);
             DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
+            //audit-info How can a credit position not being transferable ? 
             if (!state.isCreditPositionTransferrable(params.creditPositionId)) {
                 revert Errors.CREDIT_POSITION_NOT_TRANSFERRABLE(
                     params.creditPositionId,
@@ -72,6 +73,8 @@ library BuyCreditMarket {
                 );
             }
             User storage user = state.data.users[creditPosition.lender];
+            //audit-info If credit positioni  is for sale but "allCreditPositionsForSaleDisabled" -> revert ? 
+            // What if the seller only want one specific positio to be sold instead of all ? 
             if (user.allCreditPositionsForSaleDisabled || !creditPosition.forSale) {
                 revert Errors.CREDIT_NOT_FOR_SALE(params.creditPositionId);
             }

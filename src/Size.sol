@@ -154,7 +154,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     /// @notice Executes multiple calls in a single transaction
     /// @dev This function allows for batch processing of multiple interactions with the protocol in a single transaction.
     ///      This allows users to take actions that would otherwise be denied due to deposit limits.
-    /// @param data An array of bytes encoded function calls to be executed in sequence.
+    /// @param _data An array of bytes encoded function calls to be executed in sequence.
     /// @return results An array of bytes representing the return data from each function call executed.
     function multicall(bytes[] calldata _data)
         public

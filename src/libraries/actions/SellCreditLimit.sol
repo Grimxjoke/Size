@@ -37,6 +37,8 @@ library SellCreditLimit {
         }
     }
 
+
+    //audit As it's a library , there no point to call it directly ? It only makes sense with the size contract context ? 
     /// @notice Executes the selling of credit as a limit order
     /// @param state The state
     /// @param params The input parameters for selling credit as a limit order
