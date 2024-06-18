@@ -50,6 +50,8 @@ library BuyCreditLimit {
         }
     }
 
+    //audit this overwrites a user loan offer, does this mean a user can have one offer at a time? can this be abused? updating, removing, etc
+
     /// @notice Executes the buying of credit as a limit order
     /// @param state The state
     /// @param params The input parameters for buying credit as a limit order
