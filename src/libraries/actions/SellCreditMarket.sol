@@ -56,11 +56,14 @@ library SellCreditMarket {
         // N/A
 
         // validate lender
+        //audit How do you create a Loan Offer First ? 
+        //audit If Lender seels his first Loan, LoanOffer would be 0 ? 
         if (loanOffer.isNull()) {
             revert Errors.INVALID_LOAN_OFFER(params.lender);
         }
 
         // validate creditPositionId
+        //audit-info WHy set the ID to RESERVE_ID or type(uint).max
         if (params.creditPositionId == RESERVED_ID) {
             tenor = params.tenor;
 
@@ -74,6 +77,7 @@ library SellCreditMarket {
             if (msg.sender != creditPosition.lender) {
                 revert Errors.BORROWER_IS_NOT_LENDER(msg.sender, creditPosition.lender);
             }
+            //audit-info Why revert if it's not transferable ? 
             if (!state.isCreditPositionTransferrable(params.creditPositionId)) {
                 revert Errors.CREDIT_POSITION_NOT_TRANSFERRABLE(
                     params.creditPositionId,
@@ -81,6 +85,7 @@ library SellCreditMarket {
                     state.collateralRatio(debtPosition.borrower)
                 );
             }
+            //audit If the dueDate is passed, It will always revert due to underflow
             tenor = debtPosition.dueDate - block.timestamp; // positive since the credit position is transferrable, so the loan must be ACTIVE
 
             // validate amount
@@ -134,6 +139,7 @@ library SellCreditMarket {
 
         // slither-disable-next-line uninitialized-local
         CreditPosition memory creditPosition;
+        //audit-info Why would the Id be "RESERVE_ID"
         uint256 tenor;
         if (params.creditPositionId == RESERVED_ID) {
             tenor = params.tenor;
@@ -156,6 +162,7 @@ library SellCreditMarket {
         uint256 creditAmountIn;
         uint256 fees;
 
+        //audit-info What the purpose of the this "if/else" block ? Make sure it's right 
         if (params.exactAmountIn) {
             creditAmountIn = params.amount;
 
@@ -187,18 +194,23 @@ library SellCreditMarket {
                 lender: msg.sender,
                 borrower: msg.sender,
                 futureValue: creditAmountIn,
+                //audit Suppose that it start right now, what about deadline here ? 
                 dueDate: block.timestamp + tenor
             });
         }
 
         state.createCreditPosition({
             exitCreditPositionId: params.creditPositionId == RESERVED_ID
+            //audit : 1) Why de-crement the next credit position Id instead of Increment in a case of id == RESERVED_ID? 
+            //        2) Why let the arbitrary credit position Id from input ? Might no be correct                      
                 ? state.data.nextCreditPositionId - 1
                 : params.creditPositionId,
             lender: params.lender,
             credit: creditAmountIn
         });
+        //audit Isn't Lender and msg.sender the same entity ?
         state.data.borrowAToken.transferFrom(params.lender, msg.sender, cashAmountOut);
+        //audit Why does the Lender as to pay fees ? 
         state.data.borrowAToken.transferFrom(params.lender, state.feeConfig.feeRecipient, fees);
     }
 }

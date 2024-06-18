@@ -31,6 +31,7 @@ library BuyCreditLimit {
             LoanOffer({maxDueDate: params.maxDueDate, curveRelativeTime: params.curveRelativeTime});
 
         // a null offer mean clearing their limit order
+        //audit So the Buy Credit Limit Order is validated if the Loan Offer is null ?  
         if (!loanOffer.isNull()) {
             // validate msg.sender
             // N/A

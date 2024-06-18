@@ -22,6 +22,8 @@ contract NonTransferrableScaledToken is NonTransferrableToken {
 
     event TransferUnscaled(address indexed from, address indexed to, uint256 value);
 
+
+    //note How is the variable Pool interact in any way with the token contract ? 
     constructor(
         IPool variablePool_,
         IERC20Metadata underlyingToken_,

@@ -25,18 +25,23 @@ library CapsLibrary {
     ) external view {
         // If the supply is above the cap
         if (borrowATokenSupplyAfter > state.riskConfig.borrowATokenCap) {
-            uint256 borrowATokenSupplyIncrease = borrowATokenSupplyAfter > borrowATokenSupplyBefore
+            uint256 borrowATokenSupplyIncrease = borrowATokenSupplyAfter >
+                borrowATokenSupplyBefore
                 ? borrowATokenSupplyAfter - borrowATokenSupplyBefore
                 : 0;
-            uint256 debtATokenSupplyDecrease =
-                debtTokenSupplyBefore > debtTokenSupplyAfter ? debtTokenSupplyBefore - debtTokenSupplyAfter : 0;
+            uint256 debtATokenSupplyDecrease = debtTokenSupplyBefore >
+                debtTokenSupplyAfter
+                ? debtTokenSupplyBefore - debtTokenSupplyAfter
+                : 0;
 
             // and the supply increase is greater than the debt reduction
             if (borrowATokenSupplyIncrease > debtATokenSupplyDecrease) {
                 // revert
-                revert Errors.BORROW_ATOKEN_INCREASE_EXCEEDS_DEBT_TOKEN_DECREASE(
-                    borrowATokenSupplyIncrease, debtATokenSupplyDecrease
-                );
+                revert Errors
+                    .BORROW_ATOKEN_INCREASE_EXCEEDS_DEBT_TOKEN_DECREASE(
+                        borrowATokenSupplyIncrease,
+                        debtATokenSupplyDecrease
+                    );
             }
             // otherwise, it means the debt reduction was greater than the inflow of cash: do not revert
         }
@@ -50,9 +55,13 @@ library CapsLibrary {
     ///      Due to rounding, the borrow aToken supply may be slightly less than the actual AToken supply, which is acceptable.
     /// @param state The state struct
     function validateBorrowATokenCap(State storage state) external view {
-        if (state.data.borrowAToken.totalSupply() > state.riskConfig.borrowATokenCap) {
+        if (
+            state.data.borrowAToken.totalSupply() >
+            state.riskConfig.borrowATokenCap
+        ) {
             revert Errors.BORROW_ATOKEN_CAP_EXCEEDED(
-                state.riskConfig.borrowATokenCap, state.data.borrowAToken.totalSupply()
+                state.riskConfig.borrowATokenCap,
+                state.data.borrowAToken.totalSupply()
             );
         }
     }
@@ -64,8 +73,13 @@ library CapsLibrary {
     ///        which is understood as an acceptable risk.
     /// @param state The state struct
     /// @param amount The amount of cash to withdraw
-    function validateVariablePoolHasEnoughLiquidity(State storage state, uint256 amount) public view {
-        uint256 liquidity = state.data.underlyingBorrowToken.balanceOf(address(state.data.variablePool));
+    function validateVariablePoolHasEnoughLiquidity(
+        State storage state,
+        uint256 amount
+    ) public view {
+        uint256 liquidity = state.data.underlyingBorrowToken.balanceOf(
+            address(state.data.variablePool)
+        );
         if (liquidity < amount) {
             revert Errors.NOT_ENOUGH_BORROW_ATOKEN_LIQUIDITY(liquidity, amount);
         }

@@ -74,6 +74,7 @@ library LiquidateWithReplacement {
         }
 
         // validate deadline
+        //audit If deadline passed, position cannot get liquidated anymore ? 
         if (params.deadline < block.timestamp) {
             revert Errors.PAST_DEADLINE(params.deadline);
         }

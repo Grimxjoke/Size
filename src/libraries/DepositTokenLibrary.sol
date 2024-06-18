@@ -20,8 +20,20 @@ library DepositTokenLibrary {
     /// @param from The address from which the underlying collateral token is transferred
     /// @param to The address to which the Size deposit token is minted
     /// @param amount The amount of underlying collateral token to deposit
-    function depositUnderlyingCollateralToken(State storage state, address from, address to, uint256 amount) external {
-        IERC20Metadata underlyingCollateralToken = IERC20Metadata(state.data.underlyingCollateralToken);
+    //audit-info So non-tranferable-collateral-token to underlying-collateral-token == 1:1
+    function depositUnderlyingCollateralToken(
+        State storage state,
+        address from,
+        address to,
+        uint256 amount
+    ) external {
+        IERC20Metadata underlyingCollateralToken = IERC20Metadata(
+            state.data.underlyingCollateralToken
+        );
+        //audit-info How does the library store tokens ? How to retreived it ?
+
+        //audit-issue If someone give the protocol approval. Can be front-run to deposit his token in the library by someone else.
+        //audit-issue This other User set the "to" address to himslelf and get free collateralTokens
         underlyingCollateralToken.safeTransferFrom(from, address(this), amount);
         state.data.collateralToken.mint(to, amount);
     }
@@ -31,10 +43,17 @@ library DepositTokenLibrary {
     /// @param from The address from which the Size deposit token is burned
     /// @param to The address to which the underlying collateral token is transferred
     /// @param amount The amount of underlying collateral token to withdraw
-    function withdrawUnderlyingCollateralToken(State storage state, address from, address to, uint256 amount)
-        external
-    {
-        IERC20Metadata underlyingCollateralToken = IERC20Metadata(state.data.underlyingCollateralToken);
+    function withdrawUnderlyingCollateralToken(
+        State storage state,
+        address from,
+        address to,
+        uint256 amount
+    ) external {
+        IERC20Metadata underlyingCollateralToken = IERC20Metadata(
+            state.data.underlyingCollateralToken
+        );
+        //audit-issue let anybody burn token on behalf of someone else ? Does not check that the From is the msg.sender
+        //audit-issue Anybody can call this function setting their address as "to" and set the "from" a know address who possess collateral-token
         state.data.collateralToken.burn(from, amount);
         underlyingCollateralToken.safeTransfer(to, amount);
     }
@@ -46,20 +65,41 @@ library DepositTokenLibrary {
     /// @param from The address from which the underlying borrow token is transferred
     /// @param to The address to which the Size borrow token is minted
     /// @param amount The amount of underlying borrow token to deposit
-    function depositUnderlyingBorrowTokenToVariablePool(State storage state, address from, address to, uint256 amount)
-        external
-    {
-        state.data.underlyingBorrowToken.safeTransferFrom(from, address(this), amount);
+    function depositUnderlyingBorrowTokenToVariablePool(
+        State storage state,
+        address from,
+        address to,
+        uint256 amount
+    ) external {
+        state.data.underlyingBorrowToken.safeTransferFrom(
+            from,
+            address(this),
+            amount
+        );
 
-        IAToken aToken =
-            IAToken(state.data.variablePool.getReserveData(address(state.data.underlyingBorrowToken)).aTokenAddress);
+        IAToken aToken = IAToken(
+            state
+                .data
+                .variablePool
+                .getReserveData(address(state.data.underlyingBorrowToken))
+                .aTokenAddress
+        );
 
         uint256 scaledBalanceBefore = aToken.scaledBalanceOf(address(this));
 
-        state.data.underlyingBorrowToken.forceApprove(address(state.data.variablePool), amount);
-        state.data.variablePool.supply(address(state.data.underlyingBorrowToken), amount, address(this), 0);
+        state.data.underlyingBorrowToken.forceApprove(
+            address(state.data.variablePool),
+            amount
+        );
+        state.data.variablePool.supply(
+            address(state.data.underlyingBorrowToken),
+            amount,
+            address(this),
+            0
+        );
 
-        uint256 scaledAmount = aToken.scaledBalanceOf(address(this)) - scaledBalanceBefore;
+        uint256 scaledAmount = aToken.scaledBalanceOf(address(this)) -
+            scaledBalanceBefore;
 
         state.data.borrowAToken.mintScaled(to, scaledAmount);
     }
@@ -71,18 +111,31 @@ library DepositTokenLibrary {
     /// @param from The address from which the Size borrow token is burned
     /// @param to The address to which the underlying borrow token is transferred
     /// @param amount The amount of underlying borrow token to withdraw
-    function withdrawUnderlyingTokenFromVariablePool(State storage state, address from, address to, uint256 amount)
-        external
-    {
-        IAToken aToken =
-            IAToken(state.data.variablePool.getReserveData(address(state.data.underlyingBorrowToken)).aTokenAddress);
+    function withdrawUnderlyingTokenFromVariablePool(
+        State storage state,
+        address from,
+        address to,
+        uint256 amount
+    ) external {
+        IAToken aToken = IAToken(
+            state
+                .data
+                .variablePool
+                .getReserveData(address(state.data.underlyingBorrowToken))
+                .aTokenAddress
+        );
 
         uint256 scaledBalanceBefore = aToken.scaledBalanceOf(address(this));
 
         // slither-disable-next-line unused-return
-        state.data.variablePool.withdraw(address(state.data.underlyingBorrowToken), amount, to);
+        state.data.variablePool.withdraw(
+            address(state.data.underlyingBorrowToken),
+            amount,
+            to
+        );
 
-        uint256 scaledAmount = scaledBalanceBefore - aToken.scaledBalanceOf(address(this));
+        uint256 scaledAmount = scaledBalanceBefore -
+            aToken.scaledBalanceOf(address(this));
 
         state.data.borrowAToken.burnScaled(from, scaledAmount);
     }

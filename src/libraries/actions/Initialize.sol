@@ -74,6 +74,7 @@ library Initialize {
         // validate fragmentationFee
         // N/A
 
+        //audit why is the liquidation Reward Percent is not validated ? 
         // validate liquidationRewardPercent
         // N/A
 
@@ -135,6 +136,7 @@ library Initialize {
             revert Errors.NULL_ADDRESS();
         }
         // slither-disable-next-line unused-return
+        //note Why callinght eoracle and not returning the value ? 
         IPriceFeed(o.priceFeed).getPrice();
 
         // validate variablePoolBorrowRateStaleRateInterval

@@ -80,6 +80,7 @@ library Compensate {
                     params.creditPositionWithDebtToRepayId, params.creditPositionToCompensateId
                 );
             }
+            //audit-info so "creditPositionToCompensate.lender" Should be equal to "debtPositionToRepay.borrower"
             if (creditPositionToCompensate.lender != debtPositionToRepay.borrower) {
                 revert Errors.INVALID_LENDER(creditPositionToCompensate.lender);
             }

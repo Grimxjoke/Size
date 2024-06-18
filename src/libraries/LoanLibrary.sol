@@ -60,6 +60,7 @@ library LoanLibrary {
     /// @param state The state struct
     /// @param positionId The positionId
     /// @return True if the positionId is a DebtPosition id, false otherwise
+    //audit Just because the positionId is between a certain range does not mean that the position actually exist 
     function isDebtPositionId(State storage state, uint256 positionId) internal view returns (bool) {
         return positionId >= DEBT_POSITION_ID_START && positionId < state.data.nextDebtPositionId;
     }
@@ -154,6 +155,7 @@ library LoanLibrary {
         uint256 collateral = state.data.collateralToken.balanceOf(debtPosition.borrower);
 
         if (debt != 0) {
+            //audit How is the collateral calculated ? 
             return Math.mulDivDown(collateral, debtPosition.futureValue, debt);
         } else {
             return 0;
@@ -179,6 +181,7 @@ library LoanLibrary {
         uint256 debtPositionFutureValue = debtPosition.futureValue;
 
         if (debtPositionFutureValue != 0) {
+            //audit Why is this calculated like that ? 
             return Math.mulDivDown(debtPositionCollateral, creditPositionCredit, debtPositionFutureValue);
         } else {
             return 0;
