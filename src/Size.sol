@@ -165,7 +165,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     {
         results = state.multicall(_data);
     }
-
+        
     /// @notice Deposit underlying borrow/collateral tokens to the protocol (e.g. USDC, WETH)
     ///         Borrow tokens are always deposited into the Variable Pool,
     ///         Collateral tokens are deposited into the Size contract through the DepositTokenLibrary
@@ -194,6 +194,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
         state.validateWithdraw(params);
         state.executeWithdraw(params);
         //audit-info Execute withdraw and then validate something -> Reentrancy ? CEI respected ? 
+        //@mody-reply this is a different pattern where at the end of the function is checks for invariants. 
         state.validateUserIsNotBelowOpeningLimitBorrowCR(msg.sender);
     }
 
@@ -289,6 +290,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     ///     - uint256 debtPositionId: The id of the debt position to liquidate
     ///     - uint256 minimumCollateralProfit: The minimum collateral profit that the liquidator is willing to accept from the borrower (keepers might choose to pass a value below 100% of the cash they bring and take the risk of liquidating unprofitably)
     /// @return liquidatorProfitCollateralToken The amount of collateral tokens the liquidator received from the liquidation
+    //audit @mody liquidate function should provide a 100% uptime, even when contract is paused. debatable though. 
     function liquidate(LiquidateParams calldata params)
         external
         payable
