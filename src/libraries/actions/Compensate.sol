@@ -65,6 +65,7 @@ library Compensate {
                 state.getCreditPosition(params.creditPositionToCompensateId);
             DebtPosition storage debtPositionToCompensate =
                 state.getDebtPositionByCreditPositionId(params.creditPositionToCompensateId);
+            //audit-ok @paul A credit position is transferrable if the loan is ACTIVE and the related borrower is not underwater
             if (!state.isCreditPositionTransferrable(params.creditPositionToCompensateId)) {
                 revert Errors.CREDIT_POSITION_NOT_TRANSFERRABLE(
                     params.creditPositionToCompensateId,
@@ -80,7 +81,6 @@ library Compensate {
                     params.creditPositionWithDebtToRepayId, params.creditPositionToCompensateId
                 );
             }
-            //audit-info so "creditPositionToCompensate.lender" Should be equal to "debtPositionToRepay.borrower"
             if (creditPositionToCompensate.lender != debtPositionToRepay.borrower) {
                 revert Errors.INVALID_LENDER(creditPositionToCompensate.lender);
             }

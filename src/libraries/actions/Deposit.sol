@@ -41,7 +41,7 @@ library Deposit {
         // N/A
 
         // validate msg.value
-        //audit-ok
+        //audit-ok @paul revert If msg.value > 0 AND either the value != amount OR the token address isn't WETH
         if (
             msg.value != 0 &&
             (msg.value != params.amount ||
@@ -51,9 +51,7 @@ library Deposit {
         }
 
         // validate token
-        //audit-ok The token should be either the collateral or the Borrow
-        //note To check if both token have only one entry point (should be) check this solodit issue : 
-        //note  https://solodit.xyz/issues/anyone-can-steal-money-from-other-suppliers-in-tusd-market-by-creating-negative-interest-rates-openzeppelin-compound-comprehensive-protocol-audit-markdown
+        //audit-ok @paul The token should be either the collateral or the Borrow
         if (
             params.token != address(state.data.underlyingCollateralToken) &&
             params.token != address(state.data.underlyingBorrowToken)
@@ -80,8 +78,8 @@ library Deposit {
         uint256 amount = params.amount;
         if (msg.value > 0) {
             // do not trust msg.value (see `Multicall.sol`)
-            //audit WTF the amount that the user is suppose to deposit is the amount of this address? 
-            //audit Does the User has to deposit ETH to this address first and then used 
+            //audit-ok @paul So User has to deposit ETH to the Size.sol contract (the one calling this library)
+
             amount = address(this).balance;
 
             state.data.weth.deposit{value: amount}();
@@ -100,7 +98,6 @@ library Deposit {
             if (!state.data.isMulticall) {
                 state.validateBorrowATokenCap();
             }
-        //audit Any check to be sure that the token is the underlying token ? 
         } else {
             state.depositUnderlyingCollateralToken(from, params.to, amount);
         }

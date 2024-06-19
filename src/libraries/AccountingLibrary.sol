@@ -23,7 +23,7 @@ library AccountingLibrary {
     /// @param state The state object
     /// @param debtTokenAmount The amount of debt tokens
     /// @return collateralTokenAmount The amount of collateral tokens
-    //audit-info Is this calculation correct? Rounding up vs Rounding down
+    //audit-info @paul Is this calculation correct? Rounding up vs Rounding down
     //mody-reply no issue here, the rounding up is in favor of the lender and against the borrower, good for preventing over collateralization. 
     function debtTokenAmountToCollateralTokenAmount(State storage state, uint256 debtTokenAmount)
         internal
@@ -45,7 +45,7 @@ library AccountingLibrary {
         DebtPosition storage debtPosition = state.getDebtPosition(debtPositionId);
 
         state.data.debtToken.burn(debtPosition.borrower, repayAmount);
-        debtPosition.futureValue -= repayAmount; //audit Could it underflow ? 
+        debtPosition.futureValue -= repayAmount; //audit @paul Could it underflow ? 
 
         emit Events.UpdateDebtPosition(
             debtPositionId, debtPosition.borrower, debtPosition.futureValue, debtPosition.liquidityIndexAtRepayment

@@ -31,7 +31,6 @@ library BuyCreditLimit {
             LoanOffer({maxDueDate: params.maxDueDate, curveRelativeTime: params.curveRelativeTime});
 
         // a null offer mean clearing their limit order
-        //audit So the Buy Credit Limit Order is validated if the Loan Offer is null ?  
         if (!loanOffer.isNull()) {
             // validate msg.sender
             // N/A
@@ -52,7 +51,7 @@ library BuyCreditLimit {
     }
 
     //audit @mody this overwrites a user loan offer, does this mean a user can have one offer at a time? can this be abused? updating, removing, etc
-
+    //audit @paul I think you are right. It indeed overwrite the Loan offer
     /// @notice Executes the buying of credit as a limit order
     /// @param state The state
     /// @param params The input parameters for buying credit as a limit order

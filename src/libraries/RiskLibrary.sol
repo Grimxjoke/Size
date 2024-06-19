@@ -19,7 +19,6 @@ library RiskLibrary {
     /// @param state The state
     /// @param credit The remaining credit
     function validateMinimumCredit(State storage state, uint256 credit) public view {
-        //audit Why check if credit > 0 when credit should be > state.riskConfig.minimumCreditBorrowAToken?
         if (0 < credit && credit < state.riskConfig.minimumCreditBorrowAToken) {
             revert Errors.CREDIT_LOWER_THAN_MINIMUM_CREDIT(credit, state.riskConfig.minimumCreditBorrowAToken);
         }
@@ -52,7 +51,7 @@ library RiskLibrary {
     /// @param account The account
     /// @return The collateral ratio
 
-    //audit I believe chainlink returns eth/usdc in 8 decimals, in that case, the price should be WAD-ed as well??
+    //audit @mody I believe chainlink returns eth/usdc in 8 decimals, in that case, the price should be WAD-ed as well??
     function collateralRatio(State storage state, address account) public view returns (uint256) {
         uint256 collateral = state.data.collateralToken.balanceOf(account);
         uint256 debt = state.data.debtToken.balanceOf(account);

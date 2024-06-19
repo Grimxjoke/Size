@@ -20,7 +20,7 @@ library DepositTokenLibrary {
     /// @param from The address from which the underlying collateral token is transferred
     /// @param to The address to which the Size deposit token is minted
     /// @param amount The amount of underlying collateral token to deposit
-    //audit-info So non-tranferable-collateral-token to underlying-collateral-token == 1:1
+    //audit-ok @paul So non-tranferable-collateral-token to underlying-collateral-token == 1:1
     function depositUnderlyingCollateralToken(
         State storage state,
         address from,
@@ -30,10 +30,8 @@ library DepositTokenLibrary {
         IERC20Metadata underlyingCollateralToken = IERC20Metadata(
             state.data.underlyingCollateralToken
         );
-        //audit-info How does the library store tokens ? How to retreived it ?
 
-        //audit-issue If someone give the protocol approval. Can be front-run to deposit his token in the library by someone else.
-        //audit-issue This other User set the "to" address to himslelf and get free collateralTokens
+        //audit-issue @paul If someone give the protocol approval. Can be front-run to deposit his token in the library by someone else.
         underlyingCollateralToken.safeTransferFrom(from, address(this), amount);
         state.data.collateralToken.mint(to, amount);
     }
@@ -52,8 +50,8 @@ library DepositTokenLibrary {
         IERC20Metadata underlyingCollateralToken = IERC20Metadata(
             state.data.underlyingCollateralToken
         );
-        //audit-issue let anybody burn token on behalf of someone else ? Does not check that the From is the msg.sender
-        //audit-issue Anybody can call this function setting their address as "to" and set the "from" a know address who possess collateral-token
+        //audit-issue @paul let anybody burn token on behalf of someone else ? Does not check that the From is the msg.sender
+        //audit-issue @paul Anybody can call this function setting their address as "to" and set the "from" a know address who possess collateral-token
         state.data.collateralToken.burn(from, amount);
         underlyingCollateralToken.safeTransfer(to, amount);
     }

@@ -56,14 +56,13 @@ library SellCreditMarket {
         // N/A
 
         // validate lender
-        //audit How do you create a Loan Offer First ? 
-        //audit If Lender seels his first Loan, LoanOffer would be 0 ? 
         if (loanOffer.isNull()) {
             revert Errors.INVALID_LOAN_OFFER(params.lender);
         }
 
         // validate creditPositionId
         //audit-info WHy set the ID to RESERVE_ID or type(uint).max
+        //audit-ok @paul TO create a new credit Position
         if (params.creditPositionId == RESERVED_ID) {
             tenor = params.tenor;
 

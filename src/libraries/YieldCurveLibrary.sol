@@ -119,22 +119,21 @@ library YieldCurveLibrary {
         returns (uint256)
     {
         uint256 length = curveRelativeTime.tenors.length;
-        //audit so tenor array should be only increase from beggining to the end. If not , Could DOS 
         if (tenor < curveRelativeTime.tenors[0] || tenor > curveRelativeTime.tenors[length - 1]) {
             revert Errors.TENOR_OUT_OF_RANGE(tenor, curveRelativeTime.tenors[0], curveRelativeTime.tenors[length - 1]);
         } else {
             (uint256 low, uint256 high) = Math.binarySearch(curveRelativeTime.tenors, tenor);
-            //audit Make sur that the array indexes from tenors, aprs and MarketRateMultiplier are always update together (push, pop, delete ...)
+            //audit-info @paul Make sur that the array indexes from tenors, aprs and MarketRateMultiplier are always update together (push, pop, delete ...)
             uint256 y0 =
                 getAdjustedAPR(curveRelativeTime.aprs[low], curveRelativeTime.marketRateMultipliers[low], params);
 
-            //audit-info why this "if" condition 
+            //audit-info @paul why this "if" condition 
             if (low != high) {
                 uint256 x0 = curveRelativeTime.tenors[low];
                 uint256 x1 = curveRelativeTime.tenors[high];
                 uint256 y1 =
                     getAdjustedAPR(curveRelativeTime.aprs[high], curveRelativeTime.marketRateMultipliers[high], params);
-            //audit-info I don't understand the logic here . 
+            //audit-info @paul I don't understand the logic here . 
                 if (y1 >= y0) {
                     return y0 + Math.mulDivDown(y1 - y0, tenor - x0, x1 - x0);
                 } else {

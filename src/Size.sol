@@ -176,7 +176,6 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     ///     - uint256 amount: The amount of tokens to deposit
     ///     - uint256 to: The recipient of the deposit
     function deposit(DepositParams calldata params) public payable override(ISize) whenNotPaused {
-        //note Pattern here : validate + Execute
         state.validateDeposit(params);
         state.executeDeposit(params);
     }
