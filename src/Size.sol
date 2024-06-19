@@ -36,7 +36,6 @@ import {
     LiquidateWithReplacementParams
 } from "@src/libraries/actions/LiquidateWithReplacement.sol";
 import {Repay, RepayParams} from "@src/libraries/actions/Repay.sol";
-//note  What would be the Self Liquidate ?
 import {SelfLiquidate, SelfLiquidateParams} from "@src/libraries/actions/SelfLiquidate.sol";
 import {Withdraw, WithdrawParams} from "@src/libraries/actions/Withdraw.sol";
 
@@ -52,9 +51,7 @@ import {IMulticall} from "@src/interfaces/IMulticall.sol";
 import {ISize} from "@src/interfaces/ISize.sol";
 import {ISizeAdmin} from "@src/interfaces/ISizeAdmin.sol";
 
-//note Probably the Bot address
 bytes32 constant KEEPER_ROLE = keccak256("KEEPER_ROLE");
-//note Probably Owner Address
 bytes32 constant PAUSER_ROLE = keccak256("PAUSER_ROLE");
 bytes32 constant BORROW_RATE_UPDATER_ROLE = keccak256("BORROW_RATE_UPDATER_ROLE");
 
@@ -63,7 +60,6 @@ bytes32 constant BORROW_RATE_UPDATER_ROLE = keccak256("BORROW_RATE_UPDATER_ROLE"
 /// @author Size (https://size.credit/)
 /// @notice See the documentation in {ISize}.
 contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, PausableUpgradeable, UUPSUpgradeable {
-    //note They use a lot of Library to only change the State 
     using Initialize for State;
     using UpdateConfig for State;
     using Deposit for State;
@@ -102,7 +98,6 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
         __UUPSUpgradeable_init();
 
         state.executeInitialize(f, r, o, d);
-        //note All Role given to Owner
         _grantRole(DEFAULT_ADMIN_ROLE, owner);
         _grantRole(PAUSER_ROLE, owner);
         _grantRole(KEEPER_ROLE, owner);
@@ -189,7 +184,6 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     ///     - uint256 amount: The amount of tokens to withdraw (in decimals, e.g. 1_000e6 for 1000 USDC or 10e18 for 10 WETH)
     ///     - uint256 to: The recipient of the withdrawal
     function withdraw(WithdrawParams calldata params) external payable override(ISize) whenNotPaused {
-        //note Same pattern
         state.validateWithdraw(params);
         state.executeWithdraw(params);
         //audit-info Execute withdraw and then validate something -> Reentrancy ? CEI respected ? 

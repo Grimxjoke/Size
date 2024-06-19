@@ -48,7 +48,10 @@ library SellCreditMarket {
     /// @notice Validates the input parameters for selling credit as a market order
     /// @param state The state
     /// @param params The input parameters for selling credit as a market order
-    function validateSellCreditMarket(State storage state, SellCreditMarketParams calldata params) external view {
+    function validateSellCreditMarket(
+        State storage state,
+        SellCreditMarketParams calldata params
+    ) external view {
         LoanOffer memory loanOffer = state.data.users[params.lender].loanOffer;
         uint256 tenor;
 
@@ -67,16 +70,29 @@ library SellCreditMarket {
             tenor = params.tenor;
 
             // validate tenor
-            if (tenor < state.riskConfig.minTenor || tenor > state.riskConfig.maxTenor) {
-                revert Errors.TENOR_OUT_OF_RANGE(tenor, state.riskConfig.minTenor, state.riskConfig.maxTenor);
+            if (
+                tenor < state.riskConfig.minTenor ||
+                tenor > state.riskConfig.maxTenor
+            ) {
+                revert Errors.TENOR_OUT_OF_RANGE(
+                    tenor,
+                    state.riskConfig.minTenor,
+                    state.riskConfig.maxTenor
+                );
             }
         } else {
-            CreditPosition storage creditPosition = state.getCreditPosition(params.creditPositionId);
-            DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
+            CreditPosition storage creditPosition = state.getCreditPosition(
+                params.creditPositionId
+            );
+            DebtPosition storage debtPosition = state
+                .getDebtPositionByCreditPositionId(params.creditPositionId);
             if (msg.sender != creditPosition.lender) {
-                revert Errors.BORROWER_IS_NOT_LENDER(msg.sender, creditPosition.lender);
+                revert Errors.BORROWER_IS_NOT_LENDER(
+                    msg.sender,
+                    creditPosition.lender
+                );
             }
-            //audit-info Why revert if it's not transferable ? 
+
             if (!state.isCreditPositionTransferrable(params.creditPositionId)) {
                 revert Errors.CREDIT_POSITION_NOT_TRANSFERRABLE(
                     params.creditPositionId,
@@ -84,23 +100,32 @@ library SellCreditMarket {
                     state.collateralRatio(debtPosition.borrower)
                 );
             }
-            //audit If the dueDate is passed, It will always revert due to underflow
+
             tenor = debtPosition.dueDate - block.timestamp; // positive since the credit position is transferrable, so the loan must be ACTIVE
 
             // validate amount
             if (params.amount > creditPosition.credit) {
-                revert Errors.NOT_ENOUGH_CREDIT(params.amount, creditPosition.credit);
+                revert Errors.NOT_ENOUGH_CREDIT(
+                    params.amount,
+                    creditPosition.credit
+                );
             }
         }
 
         // validate amount
         if (params.amount < state.riskConfig.minimumCreditBorrowAToken) {
-            revert Errors.CREDIT_LOWER_THAN_MINIMUM_CREDIT(params.amount, state.riskConfig.minimumCreditBorrowAToken);
+            revert Errors.CREDIT_LOWER_THAN_MINIMUM_CREDIT(
+                params.amount,
+                state.riskConfig.minimumCreditBorrowAToken
+            );
         }
 
         // validate tenor
         if (block.timestamp + tenor > loanOffer.maxDueDate) {
-            revert Errors.DUE_DATE_GREATER_THAN_MAX_DUE_DATE(block.timestamp + tenor, loanOffer.maxDueDate);
+            revert Errors.DUE_DATE_GREATER_THAN_MAX_DUE_DATE(
+                block.timestamp + tenor,
+                loanOffer.maxDueDate
+            );
         }
 
         // validate deadline
@@ -112,8 +137,12 @@ library SellCreditMarket {
         uint256 apr = loanOffer.getAPRByTenor(
             VariablePoolBorrowRateParams({
                 variablePoolBorrowRate: state.oracle.variablePoolBorrowRate,
-                variablePoolBorrowRateUpdatedAt: state.oracle.variablePoolBorrowRateUpdatedAt,
-                variablePoolBorrowRateStaleRateInterval: state.oracle.variablePoolBorrowRateStaleRateInterval
+                variablePoolBorrowRateUpdatedAt: state
+                    .oracle
+                    .variablePoolBorrowRateUpdatedAt,
+                variablePoolBorrowRateStaleRateInterval: state
+                    .oracle
+                    .variablePoolBorrowRateStaleRateInterval
             }),
             tenor
         );
@@ -128,46 +157,59 @@ library SellCreditMarket {
     /// @notice Executes the selling of credit as a market order
     /// @param state The state
     /// @param params The input parameters for selling credit as a market order
-    function executeSellCreditMarket(State storage state, SellCreditMarketParams calldata params)
-        external
-        returns (uint256 cashAmountOut)
-    {
+    function executeSellCreditMarket(
+        State storage state,
+        SellCreditMarketParams calldata params
+    ) external returns (uint256 cashAmountOut) {
         emit Events.SellCreditMarket(
-            params.lender, params.creditPositionId, params.tenor, params.amount, params.tenor, params.exactAmountIn
+            params.lender,
+            params.creditPositionId,
+            params.tenor,
+            params.amount,
+            params.tenor,
+            params.exactAmountIn
         );
 
-        // slither-disable-next-line uninitialized-local
         CreditPosition memory creditPosition;
-        //audit-info Why would the Id be "RESERVE_ID"
         uint256 tenor;
         if (params.creditPositionId == RESERVED_ID) {
             tenor = params.tenor;
         } else {
-            DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
+            DebtPosition storage debtPosition = state
+                .getDebtPositionByCreditPositionId(params.creditPositionId);
             creditPosition = state.getCreditPosition(params.creditPositionId);
 
             tenor = debtPosition.dueDate - block.timestamp;
         }
 
-        uint256 ratePerTenor = state.data.users[params.lender].loanOffer.getRatePerTenor(
-            VariablePoolBorrowRateParams({
-                variablePoolBorrowRate: state.oracle.variablePoolBorrowRate,
-                variablePoolBorrowRateUpdatedAt: state.oracle.variablePoolBorrowRateUpdatedAt,
-                variablePoolBorrowRateStaleRateInterval: state.oracle.variablePoolBorrowRateStaleRateInterval
-            }),
-            tenor
-        );
+        uint256 ratePerTenor = state
+            .data
+            .users[params.lender]
+            .loanOffer
+            .getRatePerTenor(
+                VariablePoolBorrowRateParams({
+                    variablePoolBorrowRate: state.oracle.variablePoolBorrowRate,
+                    variablePoolBorrowRateUpdatedAt: state
+                        .oracle
+                        .variablePoolBorrowRateUpdatedAt,
+                    variablePoolBorrowRateStaleRateInterval: state
+                        .oracle
+                        .variablePoolBorrowRateStaleRateInterval
+                }),
+                tenor
+            );
 
         uint256 creditAmountIn;
         uint256 fees;
 
-        //audit-info What the purpose of the this "if/else" block ? Make sure it's right 
         if (params.exactAmountIn) {
             creditAmountIn = params.amount;
 
             (cashAmountOut, fees) = state.getCashAmountOut({
                 creditAmountIn: creditAmountIn,
-                maxCredit: params.creditPositionId == RESERVED_ID ? creditAmountIn : creditPosition.credit,
+                maxCredit: params.creditPositionId == RESERVED_ID
+                    ? creditAmountIn
+                    : creditPosition.credit,
                 ratePerTenor: ratePerTenor,
                 tenor: tenor
             });
@@ -178,9 +220,17 @@ library SellCreditMarket {
                 cashAmountOut: cashAmountOut,
                 maxCashAmountOut: params.creditPositionId == RESERVED_ID
                     ? cashAmountOut
-                    : Math.mulDivDown(creditPosition.credit, PERCENT - state.getSwapFeePercent(tenor), PERCENT + ratePerTenor),
+                    : Math.mulDivDown(
+                        creditPosition.credit,
+                        PERCENT - state.getSwapFeePercent(tenor),
+                        PERCENT + ratePerTenor
+                    ),
                 maxCredit: params.creditPositionId == RESERVED_ID
-                    ? Math.mulDivUp(cashAmountOut, PERCENT + ratePerTenor, PERCENT - state.getSwapFeePercent(tenor))
+                    ? Math.mulDivUp(
+                        cashAmountOut,
+                        PERCENT + ratePerTenor,
+                        PERCENT - state.getSwapFeePercent(tenor)
+                    )
                     : creditPosition.credit,
                 ratePerTenor: ratePerTenor,
                 tenor: tenor
@@ -188,28 +238,34 @@ library SellCreditMarket {
         }
 
         if (params.creditPositionId == RESERVED_ID) {
-            // slither-disable-next-line unused-return
             state.createDebtAndCreditPositions({
                 lender: msg.sender,
                 borrower: msg.sender,
                 futureValue: creditAmountIn,
-                //audit Suppose that it start right now, what about deadline here ? 
                 dueDate: block.timestamp + tenor
             });
         }
 
         state.createCreditPosition({
+            //audit-info @paul : 1) Why de-crement the next credit position Id instead of Increment in a case of id == RESERVED_ID?
+            //        2) Why let the arbitrary credit position Id from input ? Might no be correct
             exitCreditPositionId: params.creditPositionId == RESERVED_ID
-            //audit : 1) Why de-crement the next credit position Id instead of Increment in a case of id == RESERVED_ID? 
-            //        2) Why let the arbitrary credit position Id from input ? Might no be correct                      
                 ? state.data.nextCreditPositionId - 1
                 : params.creditPositionId,
             lender: params.lender,
             credit: creditAmountIn
         });
-        //audit Isn't Lender and msg.sender the same entity ?
-        state.data.borrowAToken.transferFrom(params.lender, msg.sender, cashAmountOut);
-        //audit Why does the Lender as to pay fees ? 
-        state.data.borrowAToken.transferFrom(params.lender, state.feeConfig.feeRecipient, fees);
+        //audit-info @paul Isn't Lender and msg.sender the same entity ?
+        state.data.borrowAToken.transferFrom(
+            params.lender,
+            msg.sender,
+            cashAmountOut
+        );
+        //audit-info @paul Why does the Lender as to pay fees ?
+        state.data.borrowAToken.transferFrom(
+            params.lender,
+            state.feeConfig.feeRecipient,
+            fees
+        );
     }
 }
