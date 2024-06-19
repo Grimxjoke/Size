@@ -47,6 +47,7 @@ library SelfLiquidate {
         }
 
         //audit @paul So CR should be lower than Percent (1e18), why ? 
+        //@mody-reply this is very odd. 
         if (state.collateralRatio(debtPosition.borrower) >= PERCENT) {
             revert Errors.LIQUIDATION_NOT_AT_LOSS(params.creditPositionId, state.collateralRatio(debtPosition.borrower));
         }

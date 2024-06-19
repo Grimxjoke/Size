@@ -70,6 +70,7 @@ library RiskLibrary {
     /// @param state The state
     /// @param creditPositionId The credit position ID
     /// @return True if the credit position is self-liquidatable, false otherwise
+    // audit-issue similar to liquidate function.. the position is should be self-liquidatable if it is overdue even if it is not underwater (reagrdless of CR)
     function isCreditPositionSelfLiquidatable(State storage state, uint256 creditPositionId)
         public
         view

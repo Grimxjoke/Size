@@ -302,6 +302,8 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     /// @dev The user is prevented to self liquidate if a regular liquidation would be profitable
     /// @param params SelfLiquidateParams struct containing the following fields:
     ///     - uint256 creditPositionId: The id of the credit position to self-liquidate
+    //audit @mody, what if the caller has a credit position to issue a loan and that loan get liquidated due to the other borrower having low collateral. what happens in that case? 
+    //audit @mody the comment above mentioned that the self liquidate should fail if the normal liquidation is profitable. I don't see this calculation checking whether it is profitable or not
     function selfLiquidate(SelfLiquidateParams calldata params) external payable override(ISize) whenNotPaused {
         state.validateSelfLiquidate(params);
         state.executeSelfLiquidate(params);
