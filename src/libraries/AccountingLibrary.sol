@@ -23,7 +23,7 @@ library AccountingLibrary {
     /// @param state The state object
     /// @param debtTokenAmount The amount of debt tokens
     /// @return collateralTokenAmount The amount of collateral tokens
-    //audit-info @paul Is this calculation correct? Rounding up vs Rounding down
+    //audit-ok @paul Is this calculation correct? Rounding up vs Rounding down
     //mody-reply no issue here, the rounding up is in favor of the lender and against the borrower, good for preventing over collateralization. 
     function debtTokenAmountToCollateralTokenAmount(State storage state, uint256 debtTokenAmount)
         internal
