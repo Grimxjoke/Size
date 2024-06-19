@@ -51,6 +51,8 @@ library RiskLibrary {
     /// @param state The state
     /// @param account The account
     /// @return The collateral ratio
+
+    //audit I believe chainlink returns eth/usdc in 8 decimals, in that case, the price should be WAD-ed as well??
     function collateralRatio(State storage state, address account) public view returns (uint256) {
         uint256 collateral = state.data.collateralToken.balanceOf(account);
         uint256 debt = state.data.debtToken.balanceOf(account);
