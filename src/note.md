@@ -119,5 +119,4 @@ Also if the calculation is right, how do oyu make sence of it ? What I mean is t
 
 
 
-So first , create Borrow Offer, a Loan Offer, 
-    And then Create a credit position and a DEbt Position
+How can the market Multiplier can change

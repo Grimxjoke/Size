@@ -352,7 +352,15 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
         state.validateUserIsNotUnderwater(msg.sender);
     }
 
-    /// @inheritdoc ISize
+    /// @notice Set the credit positions for sale
+    /// @dev By default, all created creadit positions are for sale.
+    ///      Users who want to disable the sale of all or specific credit positions can do so by calling this function.
+    ///      By default, all users CR to open a position is crOpening. Users who want to increase their CR opening limit can do so by calling this function.
+    /// @param params SetUserConfigurationParams struct containing the following fields:
+    ///     - uint256 openingLimitBorrowCR: The opening limit borrow collateral ratio, which indicates the maximum CR the borrower is willing to accept after their offer is picked by a lender
+    ///     - bool allCreditPositionsForSaleDisabled: This global flag indicates if all credit positions should be set for sale or not
+    ///     - bool creditPositionIdsForSale: This flag indicates if the creditPositionIds array should be set for sale or not
+    ///     - uint256[] creditPositionIds: The id of the credit positions
     function setUserConfiguration(SetUserConfigurationParams calldata params)
         external
         payable

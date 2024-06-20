@@ -93,6 +93,7 @@ library YieldCurveLibrary {
         if (marketRateMultiplier == 0) {
             return SafeCast.toUint256(apr);
         } else if (
+            //audit Oracle part to Check
             params.variablePoolBorrowRateStaleRateInterval == 0
                 || (
                     block.timestamp - params.variablePoolBorrowRateUpdatedAt
@@ -102,9 +103,11 @@ library YieldCurveLibrary {
             revert Errors.STALE_RATE(params.variablePoolBorrowRateUpdatedAt);
         } else {
             return SafeCast.toUint256(
+            //  apr + ( Aave Borrow Rate * marketRate Multiplier / Percent )
                 apr + SafeCast.toInt256(Math.mulDivDown(params.variablePoolBorrowRate, marketRateMultiplier, PERCENT))
             );
         }
+
     }
 
     /// @notice Get the rate from the yield curve by performing a linear interpolation between two time buckets
@@ -123,7 +126,6 @@ library YieldCurveLibrary {
             revert Errors.TENOR_OUT_OF_RANGE(tenor, curveRelativeTime.tenors[0], curveRelativeTime.tenors[length - 1]);
         } else {
             (uint256 low, uint256 high) = Math.binarySearch(curveRelativeTime.tenors, tenor);
-            //audit-info @paul Make sur that the array indexes from tenors, aprs and MarketRateMultiplier are always update together (push, pop, delete ...)
             uint256 y0 =
                 getAdjustedAPR(curveRelativeTime.aprs[low], curveRelativeTime.marketRateMultipliers[low], params);
 
