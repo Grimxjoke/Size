@@ -78,6 +78,27 @@ library YieldCurveHelper {
         return YieldCurve({tenors: tenors, aprs: aprs, marketRateMultipliers: marketRateMultipliers});
     }
 
+    
+    function realInvertedCurve() public pure returns (YieldCurve memory) {
+        uint256[] memory tenors = new uint256[](5);
+        int256[] memory aprs = new int256[](5);
+        uint256[] memory marketRateMultipliers = new uint256[](5);
+
+        aprs[0] = 0.05e18;
+        aprs[1] = 0.04e18;
+        aprs[2] = 0.03e18;
+        aprs[3] = 0.02e18;
+        aprs[4] = 0.01e18;
+
+        tenors[0] = 15 days;
+        tenors[1] = 30 days;
+        tenors[2] = 60 days;
+        tenors[3] = 120 days;
+        tenors[4] = 240 days;
+
+        return YieldCurve({tenors: tenors, aprs: aprs, marketRateMultipliers: marketRateMultipliers});
+    }
+
     // Humped (or Peaked) Yield Curve: A humped yield curve features higher
     // yields for intermediate-tenor bonds compared to both short-tenor and
     // long-tenor bonds. It may indicate market uncertainty or expectations

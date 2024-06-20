@@ -1,6 +1,7 @@
 // SPDX-License-Identifier: MIT
 pragma solidity 0.8.23;
 
+import "forge-std/console.sol";
 import {BaseTest} from "@test/BaseTest.sol";
 
 import {Errors} from "@src/libraries/Errors.sol";
@@ -38,6 +39,7 @@ contract BuyCreditLimitTest is BaseTest {
         tenors[1] = 60 days;
         int256[] memory aprs = new int256[](2);
         aprs[0] = 0.15e18;
+        //audit Here the fist APR is overwriten then the aprs[1] is therefore 0.
         aprs[0] = 0.12e18;
 
         vm.prank(alice);
@@ -47,12 +49,18 @@ contract BuyCreditLimitTest is BaseTest {
                 curveRelativeTime: YieldCurve({tenors: tenors, marketRateMultipliers: marketRateMultipliers, aprs: aprs})
             })
         );
+        
+        
+        console.log("Alice Loan Offer is :",  5);
+        
 
-        _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 45 days, false);
+        uint debtPositionId = _sellCreditMarket(bob, alice, RESERVED_ID, 100e6, 45 days, false);
+        console.log("debt Position Id after bob sell Credit Market to Alice is ", debtPositionId);
 
         BuyCreditLimitParams memory empty;
         vm.prank(alice);
         size.buyCreditLimit(empty);
+        // console.log("Alice second Loan Offer is :",  size.state.data.users[address(alice)].loanOffer);
 
         uint256 amount = 100e6;
         uint256 tenor = 45 days;

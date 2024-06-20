@@ -39,3 +39,4 @@ struct DataView {
     // The variable pool
     IPool variablePool;
 }
+

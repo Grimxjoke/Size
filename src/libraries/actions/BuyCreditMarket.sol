@@ -194,7 +194,7 @@ library BuyCreditMarket {
         }
 
         state.data.borrowAToken.transferFrom(msg.sender, borrower, cashAmountIn - fees);
-        //audit-info @paul So Lender has to pay fees for lending his money ? 
+        //audit-info @paul So Lender has to pay swapfees for lending his money ? 
         state.data.borrowAToken.transferFrom(msg.sender, state.feeConfig.feeRecipient, fees);
     }
 }

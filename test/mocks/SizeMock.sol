@@ -3,6 +3,7 @@ pragma solidity 0.8.23;
 
 import {Size} from "@src/Size.sol";
 import {State} from "@src/SizeStorage.sol";
+import "forge-std/console.sol";
 
 import {
     CREDIT_POSITION_ID_START,
@@ -22,6 +23,7 @@ contract SizeMock is Size {
     bool public IS_TEST = true;
 
     function version() public pure returns (uint256) {
+       
         return 2;
     }
 
@@ -32,6 +34,7 @@ contract SizeMock is Size {
             uint256 debtPositionId = DEBT_POSITION_ID_START + i;
             debtPositions[i] = state.getDebtPosition(debtPositionId);
         }
+         console.log(2);
     }
 
     function getDebtPositions(uint256[] memory debtPositionIds)
