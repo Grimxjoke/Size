@@ -103,7 +103,8 @@ library YieldCurveLibrary {
             revert Errors.STALE_RATE(params.variablePoolBorrowRateUpdatedAt);
         } else {
             return SafeCast.toUint256(
-            //  apr + ( Aave Borrow Rate * marketRate Multiplier / Percent )
+            //audit-ok @paul apr + ( Aave Borrow Rate * marketRate Multiplier / Percent ) -> Percent is used because marketRatMultiplier is multiply by 1e18. 
+            //note @paul See rate Hooks: https://docs.size.credit/non-technical/the-yield-curve-order-book/rate-hooks#aave-variable-rate-hook 
                 apr + SafeCast.toInt256(Math.mulDivDown(params.variablePoolBorrowRate, marketRateMultiplier, PERCENT))
             );
         }
