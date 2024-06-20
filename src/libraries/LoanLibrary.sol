@@ -95,6 +95,7 @@ library LoanLibrary {
         view
         returns (CreditPosition storage)
     {
+        //audit The position could not exist.
         if (isCreditPositionId(state, creditPositionId)) {
             return state.data.creditPositions[creditPositionId];
         } else {

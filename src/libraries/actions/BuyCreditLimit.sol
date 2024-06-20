@@ -31,6 +31,7 @@ library BuyCreditLimit {
             LoanOffer({maxDueDate: params.maxDueDate, curveRelativeTime: params.curveRelativeTime});
 
         // a null offer mean clearing their limit order
+        //audit-ok @paul Meaning that all params in the struct have default values
         if (!loanOffer.isNull()) {
             // validate msg.sender
             // N/A
@@ -44,6 +45,7 @@ library BuyCreditLimit {
             }
 
             // validate curveRelativeTime
+            //audit-ok @paul Verify that none of the array length is 0 AND they're all the same length
             YieldCurveLibrary.validateYieldCurve(
                 params.curveRelativeTime, state.riskConfig.minTenor, state.riskConfig.maxTenor
             );
@@ -51,7 +53,7 @@ library BuyCreditLimit {
     }
 
     //audit @mody this overwrites a user loan offer, does this mean a user can have one offer at a time? can this be abused? updating, removing, etc
-    //audit @paul I think you are right. It indeed overwrite the Loan offer
+    //audit-ok @paul User can indeed have one loan offer with one maxDueDate, but many yields curve 
     /// @notice Executes the buying of credit as a limit order
     /// @param state The state
     /// @param params The input parameters for buying credit as a limit order

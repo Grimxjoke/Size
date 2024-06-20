@@ -64,7 +64,6 @@ library BuyCreditMarket {
         } else {
             CreditPosition storage creditPosition = state.getCreditPosition(params.creditPositionId);
             DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
-            //audit-info @paul How can a credit position not being transferable ? 
             //audit-ok   @paul A credit position is transferrable if the loan is ACTIVE and the related borrower is not underwater
             if (!state.isCreditPositionTransferrable(params.creditPositionId)) {
                 revert Errors.CREDIT_POSITION_NOT_TRANSFERRABLE(
@@ -128,7 +127,6 @@ library BuyCreditMarket {
             params.borrower, params.creditPositionId, params.tenor, params.amount, params.exactAmountIn
         );
 
-        // slither-disable-next-line uninitialized-local
         CreditPosition memory creditPosition;
         uint256 tenor;
         address borrower;
@@ -142,7 +140,7 @@ library BuyCreditMarket {
             borrower = creditPosition.lender;
             tenor = debtPosition.dueDate - block.timestamp;
         }
-
+        //audit-info @paul What is ratePerTenor ? 
         uint256 ratePerTenor = state.data.users[borrower].borrowOffer.getRatePerTenor(
             VariablePoolBorrowRateParams({
                 variablePoolBorrowRate: state.oracle.variablePoolBorrowRate,
@@ -162,6 +160,7 @@ library BuyCreditMarket {
                 maxCashAmountIn: params.creditPositionId == RESERVED_ID
                     ? cashAmountIn
                     : Math.mulDivUp(creditPosition.credit, PERCENT, PERCENT + ratePerTenor),
+                //audit-info @paul Isn't the credit amount should get "divUp"
                 maxCredit: params.creditPositionId == RESERVED_ID
                     ? Math.mulDivDown(cashAmountIn, PERCENT + ratePerTenor, PERCENT)
                     : creditPosition.credit,
@@ -172,6 +171,7 @@ library BuyCreditMarket {
             creditAmountOut = params.amount;
             (cashAmountIn, fees) = state.getCashAmountIn({
                 creditAmountOut: creditAmountOut,
+                //audit-info @paul Where is the creditPosition.credit get increase ? 
                 maxCredit: params.creditPositionId == RESERVED_ID ? creditAmountOut : creditPosition.credit,
                 ratePerTenor: ratePerTenor,
                 tenor: tenor
@@ -179,7 +179,6 @@ library BuyCreditMarket {
         }
 
         if (params.creditPositionId == RESERVED_ID) {
-            // slither-disable-next-line unused-return
             state.createDebtAndCreditPositions({
                 lender: msg.sender,
                 borrower: borrower,
@@ -195,6 +194,7 @@ library BuyCreditMarket {
         }
 
         state.data.borrowAToken.transferFrom(msg.sender, borrower, cashAmountIn - fees);
+        //audit-info @paul So Lender has to pay fees for lending his money ? 
         state.data.borrowAToken.transferFrom(msg.sender, state.feeConfig.feeRecipient, fees);
     }
 }

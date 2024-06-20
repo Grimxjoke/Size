@@ -113,11 +113,39 @@ Also the borrower that gets replace in LiquidateWithReplacment, Does the borrowe
 I've read many time that the size protocol used a 130% liquidation Collateral Ratio, meaning that (let's say that 1ETH = 2000$) if the user is deposit 1ETH, he can borrow up to 2000*(70/100) = 1400 USDC ? if the ETH value is dropping and the user has a loan of 1400usdc , therefore the Collateral ration will get higherr that 130% and the position will be able to be liquidabte. 
 
 
-Also if the calculation is right, how do oyu make sence of it ? What I mean is that the LCR is c = 130% = a+B so b=30% more than a= 100%. So for a collateral value of d = 100$ =  I can borrow up to d*((a - b)/100) , is that right ?
+Also if the calculation is right, how do you make sence of it ? What I mean is that the LCR is c = 130% = a+B so b=30% more than a= 100%. So for a collateral value of d = 100$ =  I can borrow up to d*((a - b)/100) , is that right ?
 
 
 
 
+## Main functions to Diagram from Size.sol: 
+    - Multicall
+    - Deposit
+    - Withdraw
+    - BuyCreditLimit
+    - SellCreditLimit
+    - BuyCreditMarket
+    - SellCreditMarket
+    - Repay
+    - Claim
+    - Liquidate
+    - SelfLiquidate
+    - LiquidateWithReplacement
+    - Compensate
+    - SetUserConfiguration
 
-So first , create Borrow Offer, a Loan Offer, 
-    And then Create a credit position and a DEbt Position
+How can the market Multiplier can change ? 
+    - Is that the Hook Rate ? 
+
+Max Due date vs Tenors vs Deadline ?  
+    - I think that maxDueDate is like the tenor for all the position, maybe the max tenor ?  
+
+SO CreditSeller is Borrower and CreditBuyer is Lender ? 
+
+When and where is the Lender money gets deposit to aave ? 
+
+
+getRatePerTenor vs getAPRPerTenor ? 
+
+
+    

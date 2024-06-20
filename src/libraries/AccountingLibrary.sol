@@ -68,6 +68,7 @@ library AccountingLibrary {
         uint256 futureValue,
         uint256 dueDate
     ) external returns (CreditPosition memory creditPosition) {
+        //audit-info @paul What is "liquidityIndexAtRepayment"
         DebtPosition memory debtPosition =
             DebtPosition({borrower: borrower, futureValue: futureValue, dueDate: dueDate, liquidityIndexAtRepayment: 0});
 
@@ -85,7 +86,9 @@ library AccountingLibrary {
 
         uint256 creditPositionId = state.data.nextCreditPositionId++;
         state.data.creditPositions[creditPositionId] = creditPosition;
+        //audit-ok @paul Do as the name suggest 
         state.validateMinimumCreditOpening(creditPosition.credit);
+        //audit-ok @paul Verify that tenor is within the accepted range (Docs : from 1h to 5years)
         state.validateTenor(dueDate - block.timestamp);
 
         emit Events.CreateCreditPosition(creditPositionId, lender, debtPositionId, RESERVED_ID, creditPosition.credit);
@@ -114,12 +117,12 @@ library AccountingLibrary {
             );
         } else {
             uint256 debtPositionId = exitCreditPosition.debtPositionId;
-
+            //audit Reduce the credit value from the CreditPosition but doesn't also update the futureValue from DebtPosition
             reduceCredit(state, exitCreditPositionId, credit);
 
             CreditPosition memory creditPosition =
                 CreditPosition({lender: lender, credit: credit, debtPositionId: debtPositionId, forSale: true});
-
+            
             uint256 creditPositionId = state.data.nextCreditPositionId++;
             state.data.creditPositions[creditPositionId] = creditPosition;
             state.validateMinimumCreditOpening(creditPosition.credit);
@@ -138,6 +141,7 @@ library AccountingLibrary {
     /// @param creditPositionId The credit position id
     function reduceCredit(State storage state, uint256 creditPositionId, uint256 amount) public {
         CreditPosition storage creditPosition = state.getCreditPosition(creditPositionId);
+        //audit-info We don't reduce the FutureValue from the Debt Position
         creditPosition.credit -= amount;
         state.validateMinimumCredit(creditPosition.credit);
 
@@ -243,7 +247,6 @@ library AccountingLibrary {
             maxCashAmountOutFragmentation = maxCashAmountOut - state.feeConfig.fragmentationFee;
         }
 
-        // slither-disable-next-line incorrect-equality
         if (cashAmountOut == maxCashAmountOut) {
             // no credit fractionalization
 

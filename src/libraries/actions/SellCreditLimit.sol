@@ -26,18 +26,20 @@ library SellCreditLimit {
         BorrowOffer memory borrowOffer = BorrowOffer({curveRelativeTime: params.curveRelativeTime});
 
         // a null offer mean clearing their limit order
+        //audit-ok @paul Meaning that all params in the struct have default values
         if (!borrowOffer.isNull()) {
             // validate msg.sender
             // N/A
 
             // validate curveRelativeTime
+           //audit-ok @paul Verify that none of the array length is 0 AND they're all the same length
             YieldCurveLibrary.validateYieldCurve(
                 params.curveRelativeTime, state.riskConfig.minTenor, state.riskConfig.maxTenor
             );
         }
     }
 
-    //audit @paul Same here, the Borrow Offer is overwritten.
+
     /// @notice Executes the selling of credit as a limit order
     /// @param state The state
     /// @param params The input parameters for selling credit as a limit order
