@@ -33,7 +33,7 @@ import {BuyCreditMarketParams} from "@src/libraries/actions/BuyCreditMarket.sol"
 import {SetUserConfigurationParams} from "@src/libraries/actions/SetUserConfiguration.sol";
 
 import {KEEPER_ROLE} from "@src/Size.sol";
-import {UserView} from "@src/SizeView.sol";
+import {UserView, DataView} from "@src/SizeView.sol";
 import {UpdateConfigParams} from "@src/libraries/actions/UpdateConfig.sol";
 
 import {PoolMock} from "@test/mocks/PoolMock.sol";

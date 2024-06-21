@@ -147,5 +147,25 @@ When and where is the Lender money gets deposit to aave ?
 
 getRatePerTenor vs getAPRPerTenor ? 
 
+Where is the borrower get match with the best loan (lowest rate ) in the code ? 
 
+Where is the Insurrance Reserve ? 
     
+
+https://docs.size.credit/non-technical/reducing-debt-with-credit
+
+If Bob lends future value of 105USDC -> Position 1
+Borrow 85USDC -> Position 2
+
+Get back (after maturity without lender replacement) 105USDC -> Position 1
+105-85 = 20 . Get back 20 USDC as 85USDC are locked as collateral to his Loan -> position 2
+However his Loan is 85USDC + interest and collateral is 85USDC, so Bob is directly underwater on position 2 when he claims all is credit out of his position as a lenders
+
+Bob get's undercollaterized (collaretal < position collateral + swapfees + interests rate ) and never repay his Loan -> position 2. 
+
+From the docs : https://docs.size.credit/non-technical/reducing-debt-with-credit
+""Positions are liquidated one at a time, and the liquidation threshold may rise back above the liquidation threshold if the liquidation is not unprofitable, giving the user another chance to supply more collateral.""
+
+But if 1 position is liquidate, the collareral is reduce, therefore the Positions are still liquidable ?
+Make sure that the actual liquidable position is liquidate first and not a random one or the first one, if the liquidable position isn't the lower one, the user is still subject to liquidation ....  
+eg: p1(130) + p2(120) + p3(130) < 130% meaning that at least 1 position is lower than 130%, if position p1 is to be liquidate, all Position are still liquidable 
