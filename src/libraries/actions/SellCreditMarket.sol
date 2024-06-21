@@ -48,6 +48,12 @@ library SellCreditMarket {
     /// @notice Validates the input parameters for selling credit as a market order
     /// @param state The state
     /// @param params The input parameters for selling credit as a market order
+
+    //audit-ok there is already a check for the loan status that is is active before it can be transferred. 
+    // alice has a creadit position to bob's debt position
+    // bob has a debt position
+    // liquidator liquidates bob
+    //alice now has a credit position that is still open and tries to sell it --> mapped to a repaid loan
     function validateSellCreditMarket(
         State storage state,
         SellCreditMarketParams calldata params
