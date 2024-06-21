@@ -105,6 +105,8 @@ library AccountingLibrary {
     /// @param exitCreditPositionId The credit position id to exit
     /// @param lender The lender address
     /// @param credit The credit amount
+    //audit-info @mody why create a new position when exisiting an existing one. 
+    //audit-info @mody now there are 2 credit positions for one single debt position
     function createCreditPosition(State storage state, uint256 exitCreditPositionId, address lender, uint256 credit)
         external
     {

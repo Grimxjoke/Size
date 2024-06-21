@@ -36,8 +36,7 @@ library SelfLiquidate {
         DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
 
         // validate creditPositionId
-        //audit @paul How could it be not Self Liquidable ?
-        //audit-ok @paul If the position is not underwater and status is REPAID. 
+        //audit-ok @paul If the position is not underwater and status is REPAID.
         if (!state.isCreditPositionSelfLiquidatable(params.creditPositionId)) {
             revert Errors.LOAN_NOT_SELF_LIQUIDATABLE(
                 params.creditPositionId,

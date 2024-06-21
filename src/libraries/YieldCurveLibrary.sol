@@ -85,6 +85,7 @@ library YieldCurveLibrary {
     /// @param marketRateMultiplier The market rate multiplier
     /// @param params The variable pool borrow rate feed params
     /// @return Returns ratePerTenor + marketRate * marketRateMultiplier
+    //audit-ok @mody
     function getAdjustedAPR(int256 apr, uint256 marketRateMultiplier, VariablePoolBorrowRateParams memory params)
         internal
         view
@@ -131,12 +132,14 @@ library YieldCurveLibrary {
                 getAdjustedAPR(curveRelativeTime.aprs[low], curveRelativeTime.marketRateMultipliers[low], params);
 
             //audit-info @paul why this "if" condition 
+            //@mody-reply if high==low then probably then the tenor/APR curve is the same 
+            //
             if (low != high) {
                 uint256 x0 = curveRelativeTime.tenors[low];
                 uint256 x1 = curveRelativeTime.tenors[high];
                 uint256 y1 =
                     getAdjustedAPR(curveRelativeTime.aprs[high], curveRelativeTime.marketRateMultipliers[high], params);
-            //audit-info @paul I don't understand the logic here . 
+            //audit-info @paul @mody I don't understand the logic here . 
                 if (y1 >= y0) {
                     return y0 + Math.mulDivDown(y1 - y0, tenor - x0, x1 - x0);
                 } else {

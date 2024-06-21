@@ -141,6 +141,7 @@ library BuyCreditMarket {
             tenor = debtPosition.dueDate - block.timestamp;
         }
         //audit-info @paul What is ratePerTenor ? 
+        // @mody-reply  in the lifecycle of a loan there are multiple different tenors with different yields/percentages. this calculates the percentage(APR) for a specific tenor requested by the user. 
         uint256 ratePerTenor = state.data.users[borrower].borrowOffer.getRatePerTenor(
             VariablePoolBorrowRateParams({
                 variablePoolBorrowRate: state.oracle.variablePoolBorrowRate,
