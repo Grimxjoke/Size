@@ -135,15 +135,11 @@ Also if the calculation is right, how do you make sence of it ? What I mean is t
     - SetUserConfiguration
 
 How can the market Multiplier can change ? 
-    - Is that the Hook Rate ? 
+    - Is that the Hook Rate ?
+    - Yes it is  
 
 Max Due date vs Tenors vs Deadline ?  
     - I think that maxDueDate is like the tenor for all the position, maybe the max tenor ?  
-
-SO CreditSeller is Borrower and CreditBuyer is Lender ? 
-
-When and where is the Lender money gets deposit to aave ? 
-
 
 getRatePerTenor vs getAPRPerTenor ? 
 
