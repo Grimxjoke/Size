@@ -209,6 +209,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     ///         - uint256[] tenors: The relative timestamps of the yield curve (for example, [30 days, 60 days, 90 days])
     ///         - uint256[] aprs: The aprs of the yield curve (for example, [0.05e18, 0.07e18, 0.08e18] to represent 5% APR, 7% APR, and 8% APR, linear interest, respectively)
     ///         - int256[] marketRateMultipliers: The market rate multipliers of the yield curve (for example, [0.99e18, 1e18, 1.1e18] to represent 99%, 100%, and 110% of the market borrow rate, respectively)
+    //audit-issue @mody the system does not do an upfront check on the collateral before placing a limit order. A malicious user can create a best limit sell and buy orders with collateral which will always fail on order market matching. There is no existing mechanism to remove penalize the bad actor or remove their offers from the order book. 
     function sellCreditLimit(SellCreditLimitParams calldata params) external payable override(ISize) whenNotPaused {
         state.validateSellCreditLimit(params);
         state.executeSellCreditLimit(params);
