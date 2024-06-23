@@ -70,7 +70,6 @@ library SellCreditMarket {
         }
 
         // validate creditPositionId
-        //audit-info WHy set the ID to RESERVE_ID or type(uint).max
         //audit-ok @paul TO create a new credit Position
         if (params.creditPositionId == RESERVED_ID) {
             tenor = params.tenor;
