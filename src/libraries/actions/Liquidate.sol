@@ -122,6 +122,7 @@ library Liquidate {
 
         state.data.borrowAToken.transferFrom(msg.sender, address(this), debtPosition.futureValue);
         state.data.collateralToken.transferFrom(debtPosition.borrower, msg.sender, liquidatorProfitCollateralToken);
+        //audit @mody. sometimes, this will be 0 amount, will it revert? doesn't seem like it https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
         state.data.collateralToken.transferFrom(
             debtPosition.borrower, state.feeConfig.feeRecipient, protocolProfitCollateralToken
         );

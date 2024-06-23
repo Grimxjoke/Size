@@ -52,7 +52,7 @@ library BuyCreditLimit {
         }
     }
 
-    //audit @mody this overwrites a user loan offer, does this mean a user can have one offer at a time? can this be abused? updating, removing, etc
+    //audit-ok @mody this overwrites a user loan offer, does this mean a user can have one offer at a time? can this be abused? updating, removing, etc
     //audit-ok @paul User can indeed have one loan offer with one maxDueDate, but many yields curve 
     /// @notice Executes the buying of credit as a limit order
     /// @param state The state

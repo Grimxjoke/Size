@@ -119,6 +119,7 @@ library BuyCreditMarket {
     /// @param state The state
     /// @param params The input parameters for buying credit as a market order
     /// @return cashAmountIn The amount of cash paid for the credit
+    //@audit-issue @mody buy and sell credit market does not remove the loan or borrow offer from the order book, this means users will keep trying to match orders which cannot be fulfilled. 
     function executeBuyCreditMarket(State storage state, BuyCreditMarketParams memory params)
         external
         returns (uint256 cashAmountIn)
@@ -196,6 +197,7 @@ library BuyCreditMarket {
 
         state.data.borrowAToken.transferFrom(msg.sender, borrower, cashAmountIn - fees);
         //audit-info @paul So Lender has to pay swapfees for lending his money ? 
+        //mody reply. I don't believe so. If the total a lender pays is 1000 and fee is 200, the borrower only gets 800 but the loan value is still 1000+interest
         state.data.borrowAToken.transferFrom(msg.sender, state.feeConfig.feeRecipient, fees);
     }
 }

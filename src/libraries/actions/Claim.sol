@@ -45,6 +45,8 @@ library Claim {
     /// @notice Executes the claiming of a credit position
     /// @param state The state
     /// @param params The input parameters for claiming a credit position
+    //audit-issue @mody execute claim calls reduce credit --> validateminimumcredit. which makes sure the remiaining credit is always between 0 < credit < state.riskConfig.minimumCreditBorrowAToken
+    //will this lead to lenders having their tokens stuck?
     function executeClaim(State storage state, ClaimParams calldata params) external {
         CreditPosition storage creditPosition = state.getCreditPosition(params.creditPositionId);
         DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
