@@ -261,7 +261,7 @@ library SellCreditMarket {
             lender: params.lender,
             credit: creditAmountIn
         });
-        //audit-info @paul Isn't Lender and msg.sender the same entity ?
+
         state.data.borrowAToken.transferFrom(
             params.lender,
             msg.sender,

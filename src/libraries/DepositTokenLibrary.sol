@@ -31,7 +31,6 @@ library DepositTokenLibrary {
             state.data.underlyingCollateralToken
         );
 
-        //audit-issue @paul If someone give the protocol approval. Can be front-run to deposit his token in the library by someone else.
         underlyingCollateralToken.safeTransferFrom(from, address(this), amount);
         state.data.collateralToken.mint(to, amount);
     }
@@ -50,8 +49,6 @@ library DepositTokenLibrary {
         IERC20Metadata underlyingCollateralToken = IERC20Metadata(
             state.data.underlyingCollateralToken
         );
-        //audit-issue @paul let anybody burn token on behalf of someone else ? Does not check that the From is the msg.sender
-        //audit-issue @paul Anybody can call this function setting their address as "to" and set the "from" a know address who possess collateral-token
         state.data.collateralToken.burn(from, amount);
         underlyingCollateralToken.safeTransfer(to, amount);
     }
