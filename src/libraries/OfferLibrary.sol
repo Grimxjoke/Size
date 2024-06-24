@@ -79,6 +79,10 @@ library OfferLibrary {
         returns (uint256)
     {
         if (tenor == 0) revert Errors.NULL_TENOR();
+
+        // Get the APR from the yield curve adjusted by the variable pool borrow rate
+        // @dev Reverts if the final result is negative
+        //      Only query the market borrow rate if the rate multiplier is not 0
         return YieldCurveLibrary.getAPR(self.curveRelativeTime, params, tenor);
     }
 
@@ -92,7 +96,11 @@ library OfferLibrary {
         view
         returns (uint256)
     {
+        // Get the APR by tenor of a borrow offer
         uint256 apr = getAPRByTenor(self, params, tenor);
+
+        // @notice Convert an APR to an absolute rate for a given tenor
+        // @dev The formula is `apr * tenor / YEAR`
         return Math.aprToRatePerTenor(apr, tenor);
     }
 }

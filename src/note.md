@@ -165,3 +165,12 @@ From the docs : https://docs.size.credit/non-technical/reducing-debt-with-credit
 But if 1 position is liquidate, the collareral is reduce, therefore the Positions are still liquidable ?
 Make sure that the actual liquidable position is liquidate first and not a random one or the first one, if the liquidable position isn't the lower one, the user is still subject to liquidation ....  
 eg: p1(130) + p2(120) + p3(130) < 130% meaning that at least 1 position is lower than 130%, if position p1 is to be liquidate, all Position are still liquidable 
+
+
+
+Questions : 
+YieldCurveLibrary::L140
+AccountingLibrary::L307 + BuyCreditMarket::L178 why PERCENT + ratePerTenor ? 
+AccountingLibrary::L309 Fees calculated Twice
+What is the "faceValue" ? 
+SelfLiquidate is for Lender ? https://docs.size.credit/technical-docs/contracts/3.5-liquidations#id-3.5.3.2-self-liquidation

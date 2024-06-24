@@ -35,3 +35,6 @@ node_modules
 # Crytic
 crytic-export
 echidna
+
+# Libraries 
+lib

@@ -48,7 +48,10 @@ library BuyCreditMarket {
     /// @notice Validates the input parameters for buying credit as a market order
     /// @param state The state
     /// @param params The input parameters for buying credit as a market order
-    function validateBuyCreditMarket(State storage state, BuyCreditMarketParams calldata params) external view {
+    function validateBuyCreditMarket(
+        State storage state,
+        BuyCreditMarketParams calldata params
+    ) external view {
         address borrower;
         uint256 tenor;
 
@@ -58,13 +61,26 @@ library BuyCreditMarket {
             tenor = params.tenor;
 
             // validate tenor
-            if (tenor < state.riskConfig.minTenor || tenor > state.riskConfig.maxTenor) {
-                revert Errors.TENOR_OUT_OF_RANGE(tenor, state.riskConfig.minTenor, state.riskConfig.maxTenor);
+            if (
+                tenor < state.riskConfig.minTenor ||
+                tenor > state.riskConfig.maxTenor
+            ) {
+                revert Errors.TENOR_OUT_OF_RANGE(
+                    tenor,
+                    state.riskConfig.minTenor,
+                    state.riskConfig.maxTenor
+                );
             }
         } else {
-            CreditPosition storage creditPosition = state.getCreditPosition(params.creditPositionId);
-            DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
-            //audit-ok   @paul A credit position is transferrable if the loan is ACTIVE and the related borrower is not underwater
+            // Get a CreditPosition from a creditPositionId
+            CreditPosition storage creditPosition = state.getCreditPosition(
+                params.creditPositionId
+            );
+
+            // Get a DebtPosition from a CreditPosition id
+            DebtPosition storage debtPosition = state
+                .getDebtPositionByCreditPositionId(params.creditPositionId);
+            //True if the credit position is transferrable, false otherwise
             if (!state.isCreditPositionTransferrable(params.creditPositionId)) {
                 revert Errors.CREDIT_POSITION_NOT_TRANSFERRABLE(
                     params.creditPositionId,
@@ -73,7 +89,10 @@ library BuyCreditMarket {
                 );
             }
             User storage user = state.data.users[creditPosition.lender];
-            if (user.allCreditPositionsForSaleDisabled || !creditPosition.forSale) {
+            if (
+                user.allCreditPositionsForSaleDisabled ||
+                !creditPosition.forSale
+            ) {
                 revert Errors.CREDIT_NOT_FOR_SALE(params.creditPositionId);
             }
 
@@ -90,7 +109,10 @@ library BuyCreditMarket {
 
         // validate amount
         if (params.amount < state.riskConfig.minimumCreditBorrowAToken) {
-            revert Errors.CREDIT_LOWER_THAN_MINIMUM_CREDIT(params.amount, state.riskConfig.minimumCreditBorrowAToken);
+            revert Errors.CREDIT_LOWER_THAN_MINIMUM_CREDIT(
+                params.amount,
+                state.riskConfig.minimumCreditBorrowAToken
+            );
         }
 
         // validate deadline
@@ -99,11 +121,16 @@ library BuyCreditMarket {
         }
 
         // validate minAPR
+        // Get the APR by tenor of a Borrow Offer
         uint256 apr = borrowOffer.getAPRByTenor(
             VariablePoolBorrowRateParams({
                 variablePoolBorrowRate: state.oracle.variablePoolBorrowRate,
-                variablePoolBorrowRateUpdatedAt: state.oracle.variablePoolBorrowRateUpdatedAt,
-                variablePoolBorrowRateStaleRateInterval: state.oracle.variablePoolBorrowRateStaleRateInterval
+                variablePoolBorrowRateUpdatedAt: state
+                    .oracle
+                    .variablePoolBorrowRateUpdatedAt,
+                variablePoolBorrowRateStaleRateInterval: state
+                    .oracle
+                    .variablePoolBorrowRateStaleRateInterval
             }),
             tenor
         );
@@ -119,13 +146,17 @@ library BuyCreditMarket {
     /// @param state The state
     /// @param params The input parameters for buying credit as a market order
     /// @return cashAmountIn The amount of cash paid for the credit
-    //@audit-issue @mody buy and sell credit market does not remove the loan or borrow offer from the order book, this means users will keep trying to match orders which cannot be fulfilled. 
-    function executeBuyCreditMarket(State storage state, BuyCreditMarketParams memory params)
-        external
-        returns (uint256 cashAmountIn)
-    {
+    //audit-issue @mody buy and sell credit market does not remove the loan or borrow offer from the order book, this means users will keep trying to match orders which cannot be fulfilled.
+    function executeBuyCreditMarket(
+        State storage state,
+        BuyCreditMarketParams memory params
+    ) external returns (uint256 cashAmountIn) {
         emit Events.BuyCreditMarket(
-            params.borrower, params.creditPositionId, params.tenor, params.amount, params.exactAmountIn
+            params.borrower,
+            params.creditPositionId,
+            params.tenor,
+            params.amount,
+            params.exactAmountIn
         );
 
         CreditPosition memory creditPosition;
@@ -135,52 +166,82 @@ library BuyCreditMarket {
             borrower = params.borrower;
             tenor = params.tenor;
         } else {
-            DebtPosition storage debtPosition = state.getDebtPositionByCreditPositionId(params.creditPositionId);
+            // Get a DebtPosition from a CreditPosition id
+            DebtPosition storage debtPosition = state
+                .getDebtPositionByCreditPositionId(params.creditPositionId);
+
+            // Get a CreditPosition from a creditPositionId
             creditPosition = state.getCreditPosition(params.creditPositionId);
 
             borrower = creditPosition.lender;
             tenor = debtPosition.dueDate - block.timestamp;
         }
-        //audit-info @paul What is ratePerTenor ? 
-        // @mody-reply  in the lifecycle of a loan there are multiple different tenors with different yields/percentages. this calculates the percentage(APR) for a specific tenor requested by the user. 
-        uint256 ratePerTenor = state.data.users[borrower].borrowOffer.getRatePerTenor(
-            VariablePoolBorrowRateParams({
-                variablePoolBorrowRate: state.oracle.variablePoolBorrowRate,
-                variablePoolBorrowRateUpdatedAt: state.oracle.variablePoolBorrowRateUpdatedAt,
-                variablePoolBorrowRateStaleRateInterval: state.oracle.variablePoolBorrowRateStaleRateInterval
-            }),
-            tenor
-        );
+        // Give the APR only for the duration of the tenor instead of an annual interest rate
+        // Example a APR of 5% with a tenor of 1month will be : 5*30/365 = 0.4% interest after 1 month
+        uint256 ratePerTenor = state
+            .data
+            .users[borrower]
+            .borrowOffer
+            .getRatePerTenor(
+                VariablePoolBorrowRateParams({
+                    variablePoolBorrowRate: state.oracle.variablePoolBorrowRate,
+                    variablePoolBorrowRateUpdatedAt: state
+                        .oracle
+                        .variablePoolBorrowRateUpdatedAt,
+                    variablePoolBorrowRateStaleRateInterval: state
+                        .oracle
+                        .variablePoolBorrowRateStaleRateInterval
+                }),
+                tenor
+            );
 
         uint256 creditAmountOut;
         uint256 fees;
 
         if (params.exactAmountIn) {
             cashAmountIn = params.amount;
+
+            //audit Needs to check the mulDivUp/mulDivDown
+            // Get the credit amount out for a given cash amount in
             (creditAmountOut, fees) = state.getCreditAmountOut({
                 cashAmountIn: cashAmountIn,
                 maxCashAmountIn: params.creditPositionId == RESERVED_ID
                     ? cashAmountIn
-                    : Math.mulDivUp(creditPosition.credit, PERCENT, PERCENT + ratePerTenor),
-                //audit-info @paul Isn't the credit amount should get "divUp"
+                    : Math.mulDivUp(
+                        creditPosition.credit,
+                        PERCENT,
+                        PERCENT + ratePerTenor
+                    ),
                 maxCredit: params.creditPositionId == RESERVED_ID
-                    ? Math.mulDivDown(cashAmountIn, PERCENT + ratePerTenor, PERCENT)
+                    ? //audit Why (Percent + ratePerTenor)
+                    Math.mulDivDown(
+                        cashAmountIn,
+                        PERCENT + ratePerTenor,
+                        PERCENT
+                    )
                     : creditPosition.credit,
                 ratePerTenor: ratePerTenor,
                 tenor: tenor
             });
         } else {
             creditAmountOut = params.amount;
+
+            // Get the cash amount in for a given credit amount out
             (cashAmountIn, fees) = state.getCashAmountIn({
                 creditAmountOut: creditAmountOut,
-                //audit-info @paul Where is the creditPosition.credit get increase ? 
-                maxCredit: params.creditPositionId == RESERVED_ID ? creditAmountOut : creditPosition.credit,
+                maxCredit: params.creditPositionId == RESERVED_ID
+                    ? creditAmountOut
+                    : creditPosition.credit,
                 ratePerTenor: ratePerTenor,
                 tenor: tenor
             });
         }
 
         if (params.creditPositionId == RESERVED_ID) {
+            /// @notice Creates a debt and credit position
+            /// @dev Updates the borrower's total debt tracker.
+            ///      The debt position future value and the credit position amount are created with the same value.
+
             state.createDebtAndCreditPositions({
                 lender: msg.sender,
                 borrower: borrower,
@@ -188,6 +249,11 @@ library BuyCreditMarket {
                 dueDate: block.timestamp + tenor
             });
         } else {
+            /// @notice Creates a credit position by exiting an existing credit position
+            /// @dev If the credit amount is the same, the existing credit position is updated with the new lender.
+            ///      If the credit amount is different, the existing credit position is reduced and a new credit position is created.
+            ///      The exit process can only be done with loans in the ACTIVE status.
+            ///        It guarantees that the sum of credit positions keeps equal to the debt position future value.
             state.createCreditPosition({
                 exitCreditPositionId: params.creditPositionId,
                 lender: msg.sender,
@@ -195,9 +261,17 @@ library BuyCreditMarket {
             });
         }
 
-        state.data.borrowAToken.transferFrom(msg.sender, borrower, cashAmountIn - fees);
-        //audit-info @paul So Lender has to pay swapfees for lending his money ? 
+        state.data.borrowAToken.transferFrom(
+            msg.sender,
+            borrower,
+            cashAmountIn - fees
+        );
+        //audit-info @paul So Lender has to pay swapfees for lending his money ?
         //mody reply. I don't believe so. If the total a lender pays is 1000 and fee is 200, the borrower only gets 800 but the loan value is still 1000+interest
-        state.data.borrowAToken.transferFrom(msg.sender, state.feeConfig.feeRecipient, fees);
+        state.data.borrowAToken.transferFrom(
+            msg.sender,
+            state.feeConfig.feeRecipient,
+            fees
+        );
     }
 }

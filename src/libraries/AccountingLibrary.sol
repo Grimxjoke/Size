@@ -286,11 +286,15 @@ library AccountingLibrary {
         uint256 ratePerTenor,
         uint256 tenor
     ) internal view returns (uint256 creditAmountOut, uint256 fees) {
+        //audit What the matter in this scenario ? 
         if (cashAmountIn == maxCashAmountIn) {
             // no credit fractionalization
 
             creditAmountOut = maxCredit;
+
+            // Should always return 0.005e18 (0.5%)
             fees = getSwapFee(state, cashAmountIn, tenor);
+        //audit Pay fragmentation fees of 5 USDC
         } else if (cashAmountIn < maxCashAmountIn) {
             // credit fractionalization
 
@@ -300,7 +304,9 @@ library AccountingLibrary {
 
             uint256 netCashAmountIn = cashAmountIn - state.feeConfig.fragmentationFee;
 
+            //audit Why (PERCENT + ratePerTenor)
             creditAmountOut = Math.mulDivDown(netCashAmountIn, PERCENT + ratePerTenor, PERCENT);
+            //audit-issue The fragmentation fees are calulated twice . 1 on the creditAmount Out 2) on the fees variables
             fees = getSwapFee(state, netCashAmountIn, tenor) + state.feeConfig.fragmentationFee;
         } else {
             revert Errors.NOT_ENOUGH_CREDIT(maxCashAmountIn, cashAmountIn);
@@ -322,6 +328,8 @@ library AccountingLibrary {
         uint256 ratePerTenor,
         uint256 tenor
     ) internal view returns (uint256 cashAmountIn, uint256 fees) {
+        //audit Isn't creditAmountOut >= maxCredit ? If the credit is greater that the maxcredit from borrower, one lender can lend a loan . 
+        // if not that mean the loan has to be taken from multiple lenders. 
         if (creditAmountOut == maxCredit) {
             // no credit fractionalization
 
@@ -332,7 +340,8 @@ library AccountingLibrary {
 
             uint256 netCashAmountIn = Math.mulDivUp(creditAmountOut, PERCENT, PERCENT + ratePerTenor);
             cashAmountIn = netCashAmountIn + state.feeConfig.fragmentationFee;
-
+            
+            //audit-issue Fragmentation Fees gets calculated twice also 
             fees = getSwapFee(state, netCashAmountIn, tenor) + state.feeConfig.fragmentationFee;
         } else {
             revert Errors.NOT_ENOUGH_CREDIT(creditAmountOut, maxCredit);
