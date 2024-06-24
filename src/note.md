@@ -174,3 +174,14 @@ AccountingLibrary::L307 + BuyCreditMarket::L178 why PERCENT + ratePerTenor ?
 AccountingLibrary::L309 Fees calculated Twice
 What is the "faceValue" ? 
 SelfLiquidate is for Lender ? https://docs.size.credit/technical-docs/contracts/3.5-liquidations#id-3.5.3.2-self-liquidation
+
+
+
+
+What does it mean ? 
+Liquidation should prioritize the lowest LTV asset
+
+
+Liquidation Rule:
+Liquidation should prioritize the liquidator fees
+Liquidation should not loose the reward the user has made so far, or use them as part of collateral
