@@ -173,16 +173,13 @@ library BuyCreditMarket {
             // Get a CreditPosition from a creditPositionId
             creditPosition = state.getCreditPosition(params.creditPositionId);
 
+            //audit-issue It's meant to be debtPosition.borrower instead as lender is msg.sender
             borrower = creditPosition.lender;
             tenor = debtPosition.dueDate - block.timestamp;
         }
         // Give the APR only for the duration of the tenor instead of an annual interest rate
         // Example a APR of 5% with a tenor of 1month will be : 5*30/365 = 0.4% interest after 1 month
-        uint256 ratePerTenor = state
-            .data
-            .users[borrower]
-            .borrowOffer
-            .getRatePerTenor(
+        uint256 ratePerTenor = state.data.users[borrower].borrowOffer.getRatePerTenor(
                 VariablePoolBorrowRateParams({
                     variablePoolBorrowRate: state.oracle.variablePoolBorrowRate,
                     variablePoolBorrowRateUpdatedAt: state
@@ -201,24 +198,16 @@ library BuyCreditMarket {
         if (params.exactAmountIn) {
             cashAmountIn = params.amount;
 
-            //audit Needs to check the mulDivUp/mulDivDown
+            
             // Get the credit amount out for a given cash amount in
             (creditAmountOut, fees) = state.getCreditAmountOut({
                 cashAmountIn: cashAmountIn,
                 maxCashAmountIn: params.creditPositionId == RESERVED_ID
                     ? cashAmountIn
-                    : Math.mulDivUp(
-                        creditPosition.credit,
-                        PERCENT,
-                        PERCENT + ratePerTenor
-                    ),
+                    : Math.mulDivUp(creditPosition.credit, PERCENT, PERCENT + ratePerTenor ),
                 maxCredit: params.creditPositionId == RESERVED_ID
-                    ? //audit Why (Percent + ratePerTenor)
-                    Math.mulDivDown(
-                        cashAmountIn,
-                        PERCENT + ratePerTenor,
-                        PERCENT
-                    )
+                    //audit Why (Percent + ratePerTenor)
+                    ? Math.mulDivDown(cashAmountIn, PERCENT + ratePerTenor, PERCENT)
                     : creditPosition.credit,
                 ratePerTenor: ratePerTenor,
                 tenor: tenor

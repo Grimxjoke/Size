@@ -86,6 +86,8 @@ library AccountingLibrary {
 
         uint256 creditPositionId = state.data.nextCreditPositionId++;
         state.data.creditPositions[creditPositionId] = creditPosition;
+
+
         //audit-ok @paul Do as the name suggest 
         state.validateMinimumCreditOpening(creditPosition.credit);
         //audit-ok @paul Verify that tenor is within the accepted range (Docs : from 1h to 5years)
@@ -117,9 +119,10 @@ library AccountingLibrary {
             emit Events.UpdateCreditPosition(
                 exitCreditPositionId, lender, exitCreditPosition.credit, exitCreditPosition.forSale
             );
-        } else {
+        } else { //audit How can the "exitCreditPosition.credit != credit" 
+            
             uint256 debtPositionId = exitCreditPosition.debtPositionId;
-            //audit Reduce the credit value from the CreditPosition but doesn't also update the futureValue from DebtPosition
+            //audit @paul Reduce the credit value from the CreditPosition but doesn't also update the futureValue from DebtPosition
             reduceCredit(state, exitCreditPositionId, credit);
 
             CreditPosition memory creditPosition =
@@ -143,7 +146,6 @@ library AccountingLibrary {
     /// @param creditPositionId The credit position id
     function reduceCredit(State storage state, uint256 creditPositionId, uint256 amount) public {
         CreditPosition storage creditPosition = state.getCreditPosition(creditPositionId);
-        //audit-info We don't reduce the FutureValue from the Debt Position
         creditPosition.credit -= amount;
         state.validateMinimumCredit(creditPosition.credit);
 

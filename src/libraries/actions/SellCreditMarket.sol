@@ -70,7 +70,7 @@ library SellCreditMarket {
         }
 
         // validate creditPositionId
-        //audit-ok @paul TO create a new credit Position
+        //audit-ok @paul To create a new credit Position
         if (params.creditPositionId == RESERVED_ID) {
             tenor = params.tenor;
 
@@ -187,11 +187,7 @@ library SellCreditMarket {
             tenor = debtPosition.dueDate - block.timestamp;
         }
 
-        uint256 ratePerTenor = state
-            .data
-            .users[params.lender]
-            .loanOffer
-            .getRatePerTenor(
+        uint256 ratePerTenor = state.data.users[params.lender].loanOffer.getRatePerTenor(
                 VariablePoolBorrowRateParams({
                     variablePoolBorrowRate: state.oracle.variablePoolBorrowRate,
                     variablePoolBorrowRateUpdatedAt: state
