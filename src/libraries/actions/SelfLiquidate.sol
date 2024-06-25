@@ -45,9 +45,9 @@ library SelfLiquidate {
             );
         }
 
-        //audit @paul So CR should be lower than Percent (1e18), why ? 
+        //audit-ok @paul So CR should be lower than Percent (1e18), why ? 
         //@mody-reply this is very odd. 
-        //audit-info It's the same as Position is underwater, collateralRation < 100% -> Position underCollaterized = underWatter
+        //audit-ok It's the same as Position is underwater, collateralRation < 100% -> Position underCollaterized = underWatter
         if (state.collateralRatio(debtPosition.borrower) >= PERCENT) {
             revert Errors.LIQUIDATION_NOT_AT_LOSS(params.creditPositionId, state.collateralRatio(debtPosition.borrower));
         }

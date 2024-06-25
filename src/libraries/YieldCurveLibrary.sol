@@ -118,6 +118,7 @@ library YieldCurveLibrary {
     /// @param params The variable pool borrow rate feed params
     /// @param tenor The tenor
     /// @return The rate from the yield curve per given tenor
+    //audit-issue @mody should be muldivup to favor the lender not the borrower
     function getAPR(YieldCurve memory curveRelativeTime, VariablePoolBorrowRateParams memory params, uint256 tenor)
         external
         view

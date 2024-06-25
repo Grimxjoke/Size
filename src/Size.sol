@@ -201,6 +201,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     ///         - uint256[] tenors: The relative timestamps of the yield curve (for example, [30 days, 60 days, 90 days])
     ///         - uint256[] aprs: The aprs of the yield curve (for example, [0.05e18, 0.07e18, 0.08e18] to represent 5% APR, 7% APR, and 8% APR, linear interest, respectively)
     ///         - int256[] marketRateMultipliers: The market rate multipliers of the yield curve (for example, [1e18, 1.2e18, 1.3e18] to represent 100%, 120%, and 130% of the market borrow rate, respectively)
+    //audit-issue @mody no need to make the function payable, if someone passes eth, someone else can call deposit and take all the eth into the variable pool, those functions don't handle eth. 
     function buyCreditLimit(BuyCreditLimitParams calldata params) external payable override(ISize) whenNotPaused {
         state.validateBuyCreditLimit(params);
         state.executeBuyCreditLimit(params);
@@ -288,7 +289,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     ///     - uint256 minimumCollateralProfit: The minimum collateral profit that the liquidator is willing to accept from the borrower (keepers might choose to pass a value below 100% of the cash they bring and take the risk of liquidating unprofitably)
     /// @return liquidatorProfitCollateralToken The amount of collateral tokens the liquidator received from the liquidation
     //audit-issue @mody liquidate function should provide a 100% uptime, even when contract is paused. debatable though. 
-    //audit @mody does the protocol allow for a gap between max credit selling (borrowing) and liquidation threshold? if not, then a user can get liquidation immediately after taking a loan. 
+    //audit-ok @mody does the protocol allow for a gap between max credit selling (borrowing) and liquidation threshold? if not, then a user can get liquidation immediately after taking a loan. 
     function liquidate(LiquidateParams calldata params)
         external
         payable
@@ -306,8 +307,8 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     /// @dev The user is prevented to self liquidate if a regular liquidation would be profitable
     /// @param params SelfLiquidateParams struct containing the following fields:
     ///     - uint256 creditPositionId: The id of the credit position to self-liquidate
-    //audit @mody, what if the caller has a credit position to issue a loan and that loan get liquidated due to the other borrower having low collateral. what happens in that case? 
-    //audit @mody the comment above mentioned that the self liquidate should fail if the normal liquidation is profitable. I don't see this calculation checking whether it is profitable or not
+    //audit-ok @mody, what if the caller has a credit position to issue a loan and that loan get liquidated due to the other borrower having low collateral. what happens in that case? 
+    //audit-ok @mody the comment above mentioned that the self liquidate should fail if the normal liquidation is profitable. I don't see this calculation checking whether it is profitable or not
     //audit-issue Same as Liquidate, this function should have a 100% uptime, It's even more crutial as it's already underwater when called
     function selfLiquidate(SelfLiquidateParams calldata params) external payable override(ISize) whenNotPaused {
         state.validateSelfLiquidate(params);

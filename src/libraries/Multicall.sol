@@ -24,7 +24,7 @@ library Multicall {
     /// @dev Receives and executes a batch of function calls on this contract.
     /// @custom:oz-upgrades-unsafe-allow-reachable delegatecall
 
-    //@audit-info @mody whis is it using the borrowAToken.balanceOf() instead of total supply or at least msg.sender
+    //@audit-ok @mody whis is it using the borrowAToken.balanceOf() instead of total supply or at least msg.sender
     function multicall(State storage state, bytes[] calldata data) internal returns (bytes[] memory results) {
         state.data.isMulticall = true;
 

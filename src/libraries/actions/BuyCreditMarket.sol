@@ -173,7 +173,6 @@ library BuyCreditMarket {
             // Get a CreditPosition from a creditPositionId
             creditPosition = state.getCreditPosition(params.creditPositionId);
 
-            //audit-issue It's meant to be debtPosition.borrower instead as lender is msg.sender
             borrower = creditPosition.lender;
             tenor = debtPosition.dueDate - block.timestamp;
         }
