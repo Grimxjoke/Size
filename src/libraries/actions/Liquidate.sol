@@ -97,7 +97,7 @@ library Liquidate {
                 Math.mulDivDown(debtInCollateralToken, state.riskConfig.crLiquidation, PERCENT);
 
             collateralRemainder = Math.min(collateralRemainder, collateralRemainderCap);
-
+            //audit-issue Should be mulDivUp as it's from the borrower to the Size protocol. In favor of the protocol
             protocolProfitCollateralToken = Math.mulDivDown(collateralRemainder, collateralProtocolPercent, PERCENT);
         } else {
             // unprofitable liquidation
@@ -112,6 +112,9 @@ library Liquidate {
         );
 
         debtPosition.liquidityIndexAtRepayment = state.data.borrowAToken.liquidityIndex();
+        //audit-issue The function never actually update the LoanStatus to "REPAID"
+        //audit-issue The Lender won't be able to claim the Borrow Amount as it need the Status to be "REPAID"
+        //note see Claim.sol::validateClaim()
         state.repayDebt(params.debtPositionId, debtPosition.futureValue);
     }
 

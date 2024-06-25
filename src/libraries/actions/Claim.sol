@@ -34,6 +34,7 @@ library Claim {
         // N/A
 
         // validate creditPositionId
+        //audit-issue Loan status not update within executeLiquidate -> See Liquidate::executeLiquidate around L118
         if (state.getLoanStatus(params.creditPositionId) != LoanStatus.REPAID) {
             revert Errors.LOAN_NOT_REPAID(params.creditPositionId);
         }
