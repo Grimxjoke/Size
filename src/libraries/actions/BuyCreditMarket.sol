@@ -255,7 +255,7 @@ library BuyCreditMarket {
             borrower,
             cashAmountIn - fees
         );
-        //audit-info @paul So Lender has to pay swapfees for lending his money ?
+        //audit-ok @paul So Lender has to pay swapfees for lending his money ?
         //mody reply. I don't believe so. If the total a lender pays is 1000 and fee is 200, the borrower only gets 800 but the loan value is still 1000+interest
         state.data.borrowAToken.transferFrom(
             msg.sender,

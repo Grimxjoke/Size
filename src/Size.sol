@@ -186,6 +186,11 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     function withdraw(WithdrawParams calldata params) external payable override(ISize) whenNotPaused {
         state.validateWithdraw(params);
         state.executeWithdraw(params);
+<<<<<<< HEAD
+=======
+        //audit-ok Execute withdraw and then validate something -> Reentrancy ? CEI respected ? 
+        //@mody-reply this is a different pattern where at the end of the function is checks for invariants. 
+>>>>>>> HEAD@{1}
         state.validateUserIsNotBelowOpeningLimitBorrowCR(msg.sender);
     }
 
@@ -303,6 +308,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     ///     - uint256 creditPositionId: The id of the credit position to self-liquidate
     //audit @mody, what if the caller has a credit position to issue a loan and that loan get liquidated due to the other borrower having low collateral. what happens in that case? 
     //audit @mody the comment above mentioned that the self liquidate should fail if the normal liquidation is profitable. I don't see this calculation checking whether it is profitable or not
+    //audit-issue Same as Liquidate, this function should have a 100% uptime, It's even more crutial as it's already underwater when called
     function selfLiquidate(SelfLiquidateParams calldata params) external payable override(ISize) whenNotPaused {
         state.validateSelfLiquidate(params);
         state.executeSelfLiquidate(params);
