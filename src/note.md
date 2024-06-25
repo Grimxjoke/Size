@@ -15,7 +15,8 @@ non transferable (scaled) tokens
 RiskLibrary: 
 debtWAD -> amountToWAD(debtAmount, Underlying Borrow token Decimals ) 
 
-```solidity Collateral ratio calculation
+Collateral ratio calculation
+```solidity
  if (debt != 0) {
             return Math.mulDivDown(collateral, price, debtWad);
         } else {
@@ -77,7 +78,6 @@ What is the diff between isUnderWater and isPositionLiquidable ?
 What is the collateral token as a non-transferabel token? ther's a lot a differents tokens , ETH as collateral, USDC as borrow token, sizeETH as collateral non-transferable token, sizeBorrowAtoken is non-transferable scaled token, and also the debt token which is non-transferable token?
 Liquidate vs LiquidateWithReplacement vs SelfLiquidate ? 
 What is "setUserConfiguration" contract ? 
-What is 150% liquidation collateral ratio ? 
 
 
 
@@ -85,32 +85,10 @@ How does a borrower give his position to another one? Is LiquidableWithTransfer 
 
 
 
-
-
-
-
-
-
-
-
-
-Attacks Ideas: 
-
-Can the Borrower self liquidate and save/earn money even when the health factor is < 1 ? 
-
-
-
-
-
-
 Does both the ETH and the sizeETH get locked until repaid or liquidation when the lender gives a loan to a borrower ? In that case, the borrower has to deposit ETH also before as collateral, what about the borrower sizeETH, what about the USDC the sizeUSDC(ST) and it's sizeDebt(debtToken) ? What it locked by the system, what is distributed to who ? 
 
 
-In self liquidate , i assume that the borrower is still loosing money but not as much as Liquidate
-Also the borrower that gets replace in LiquidateWithReplacment, Does the borrower loose more in the regular Liquidate or does he loose the same amount in both Liquidate and LiqidateWithReplacment ? 
-
-
-I've read many time that the size protocol used a 130% liquidation Collateral Ratio, meaning that (let's say that 1ETH = 2000$) if the user is deposit 1ETH, he can borrow up to 2000*(70/100) = 1400 USDC ? if the ETH value is dropping and the user has a loan of 1400usdc , therefore the Collateral ration will get higherr that 130% and the position will be able to be liquidabte. 
+I've read many time that the size protocol used a 130% liquidation Collateral Ratio, meaning that (let's say that 1ETH = 2000$) if the user is deposit 1ETH, he can borrow up to 2000*(70/100) = 1400 USDC ? if the ETH value is dropping and the user has a loan of 1400usdc , therefore the Collateral ratio will get higher that 130% and the position will be able to be liquidabte. 
 
 
 Also if the calculation is right, how do you make sence of it ? What I mean is that the LCR is c = 130% = a+B so b=30% more than a= 100%. So for a collateral value of d = 100$ =  I can borrow up to d*((a - b)/100) , is that right ?
@@ -173,7 +151,13 @@ YieldCurveLibrary::L140
 AccountingLibrary::L307 + BuyCreditMarket::L178 why PERCENT + ratePerTenor ? 
 AccountingLibrary::L309 Fees calculated Twice
 What is the "faceValue" ? 
-SelfLiquidate is for Lender ? https://docs.size.credit/technical-docs/contracts/3.5-liquidations#id-3.5.3.2-self-liquidation
+    - Face Value is the sum of all the future Value. Future Value is the amount to be pay to 1 Lender. 
+    - If the Debt Position has 2 Credit Positions (2 lenders) the faceValue = futureValue(lender1) + futureValue(lender2) 
+
+
+In SelfLiquidation, the new Assigned Collateral is : AC = oldAC * (1 - (x / D))
+x = amount of credit to cancel
+D = Total Loan (w/o interest)  
 
 
 
@@ -185,3 +169,15 @@ Liquidation should prioritize the lowest LTV asset
 Liquidation Rule:
 Liquidation should prioritize the liquidator fees
 Liquidation should not loose the reward the user has made so far, or use them as part of collateral
+
+
+
+To verify with Mody : 
+
+Assigned Value Decimals Checks <br>
+Collateral Ratio Decimals Checks <br>
+Check Liquidation page : https://docs.size.credit/technical-docs/contracts/3.5-liquidations#id-3.5.2-eligibility-for-liquidation <br>
+
+The initial values are set to:
+- 𝜌𝑜 = 150%
+- 𝜌𝑙 = 130%

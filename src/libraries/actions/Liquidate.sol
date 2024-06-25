@@ -53,22 +53,6 @@ library Liquidate {
         // N/A
     }
 
-    /// @notice Validates the minimum profit in collateral tokens expected by the liquidator
-    /// @param params The input parameters for liquidating a debt position
-    /// @param liquidatorProfitCollateralToken The profit in collateral tokens expected by the liquidator
-    function validateMinimumCollateralProfit(
-        State storage,
-        LiquidateParams calldata params,
-        uint256 liquidatorProfitCollateralToken
-    ) external pure {
-        //audit-ok  @paul Who is setting the minimumCollateralProfit ? 
-        //@mody-reply this is set by the liquidator
-        if (liquidatorProfitCollateralToken < params.minimumCollateralProfit) {
-            revert Errors.LIQUIDATE_PROFIT_BELOW_MINIMUM_COLLATERAL_PROFIT(
-                liquidatorProfitCollateralToken, params.minimumCollateralProfit
-            );
-        }
-    }
 
     /// @notice Executes the liquidation of a debt position
     /// @param state The state
@@ -129,5 +113,20 @@ library Liquidate {
 
         debtPosition.liquidityIndexAtRepayment = state.data.borrowAToken.liquidityIndex();
         state.repayDebt(params.debtPositionId, debtPosition.futureValue);
+    }
+
+    /// @notice Validates the minimum profit in collateral tokens expected by the liquidator
+    /// @param params The input parameters for liquidating a debt position
+    /// @param liquidatorProfitCollateralToken The profit in collateral tokens expected by the liquidator
+    function validateMinimumCollateralProfit(
+        State storage,
+        LiquidateParams calldata params,
+        uint256 liquidatorProfitCollateralToken
+    ) external pure {
+        if (liquidatorProfitCollateralToken < params.minimumCollateralProfit) {
+            revert Errors.LIQUIDATE_PROFIT_BELOW_MINIMUM_COLLATERAL_PROFIT(
+                liquidatorProfitCollateralToken, params.minimumCollateralProfit
+            );
+        }
     }
 }
