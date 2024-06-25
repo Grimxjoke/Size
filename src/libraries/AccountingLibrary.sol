@@ -118,13 +118,9 @@ library AccountingLibrary {
                 exitCreditPositionId, lender, exitCreditPosition.credit, exitCreditPosition.forSale
             );
         } else { //audit How can the "exitCreditPosition.credit != credit" 
-            
             uint256 debtPositionId = exitCreditPosition.debtPositionId;
-<<<<<<< HEAD
             //audit @paul Reduce the credit value from the CreditPosition but doesn't also update the futureValue from DebtPosition
-=======
             //audit-ok Reduce the credit value from the CreditPosition but doesn't also update the futureValue from DebtPosition
->>>>>>> HEAD@{1}
             reduceCredit(state, exitCreditPositionId, credit);
 
             CreditPosition memory creditPosition =

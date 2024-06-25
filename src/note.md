@@ -151,7 +151,7 @@ YieldCurveLibrary::L140
 AccountingLibrary::L307 + BuyCreditMarket::L178 why PERCENT + ratePerTenor ? 
 AccountingLibrary::L309 Fees calculated Twice
 What is the "faceValue" ? 
-<<<<<<< HEAD
+
 SelfLiquidate is for Lender ? https://docs.size.credit/technical-docs/contracts/3.5-liquidations#id-3.5.3.2-self-liquidation
 =======
     - Face Value is the sum of all the future Value. Future Value is the amount to be pay to 1 Lender. 
@@ -160,8 +160,7 @@ SelfLiquidate is for Lender ? https://docs.size.credit/technical-docs/contracts/
 
 In SelfLiquidation, the new Assigned Collateral is : AC = oldAC * (1 - (x / D))
 x = amount of credit to cancel
-D = Total Loan (w/o interest)  
->>>>>>> HEAD@{1}
+
 
 
 
@@ -172,7 +171,7 @@ Liquidation should prioritize the lowest LTV asset
 
 Liquidation Rule:
 Liquidation should prioritize the liquidator fees
-<<<<<<< HEAD
+
 Liquidation should not loose the reward the user has made so far, or use them as part of collateral
 =======
 Liquidation should not loose the reward the user has made so far, or use them as part of collateral
@@ -188,4 +187,4 @@ Check Liquidation page : https://docs.size.credit/technical-docs/contracts/3.5-l
 The initial values are set to:
 - 𝜌𝑜 = 150%
 - 𝜌𝑙 = 130%
->>>>>>> HEAD@{1}
+

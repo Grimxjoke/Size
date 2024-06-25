@@ -186,11 +186,6 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     function withdraw(WithdrawParams calldata params) external payable override(ISize) whenNotPaused {
         state.validateWithdraw(params);
         state.executeWithdraw(params);
-<<<<<<< HEAD
-=======
-        //audit-ok Execute withdraw and then validate something -> Reentrancy ? CEI respected ? 
-        //@mody-reply this is a different pattern where at the end of the function is checks for invariants. 
->>>>>>> HEAD@{1}
         state.validateUserIsNotBelowOpeningLimitBorrowCR(msg.sender);
     }
 
