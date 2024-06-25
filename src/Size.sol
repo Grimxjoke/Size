@@ -186,7 +186,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     function withdraw(WithdrawParams calldata params) external payable override(ISize) whenNotPaused {
         state.validateWithdraw(params);
         state.executeWithdraw(params);
-        //audit-info Execute withdraw and then validate something -> Reentrancy ? CEI respected ? 
+        //audit-ok Execute withdraw and then validate something -> Reentrancy ? CEI respected ? 
         //@mody-reply this is a different pattern where at the end of the function is checks for invariants. 
         state.validateUserIsNotBelowOpeningLimitBorrowCR(msg.sender);
     }
@@ -284,7 +284,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     ///     - uint256 debtPositionId: The id of the debt position to liquidate
     ///     - uint256 minimumCollateralProfit: The minimum collateral profit that the liquidator is willing to accept from the borrower (keepers might choose to pass a value below 100% of the cash they bring and take the risk of liquidating unprofitably)
     /// @return liquidatorProfitCollateralToken The amount of collateral tokens the liquidator received from the liquidation
-    //audit @mody liquidate function should provide a 100% uptime, even when contract is paused. debatable though. 
+    //audit-issue @mody liquidate function should provide a 100% uptime, even when contract is paused. debatable though. 
     //audit @mody does the protocol allow for a gap between max credit selling (borrowing) and liquidation threshold? if not, then a user can get liquidation immediately after taking a loan. 
     function liquidate(LiquidateParams calldata params)
         external

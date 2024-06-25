@@ -45,7 +45,7 @@ library AccountingLibrary {
         DebtPosition storage debtPosition = state.getDebtPosition(debtPositionId);
 
         state.data.debtToken.burn(debtPosition.borrower, repayAmount);
-        debtPosition.futureValue -= repayAmount; //audit @paul Could it underflow ? 
+        debtPosition.futureValue -= repayAmount; //audit-ok @paul Could it underflow ? 
 
         emit Events.UpdateDebtPosition(
             debtPositionId, debtPosition.borrower, debtPosition.futureValue, debtPosition.liquidityIndexAtRepayment
@@ -105,8 +105,8 @@ library AccountingLibrary {
     /// @param exitCreditPositionId The credit position id to exit
     /// @param lender The lender address
     /// @param credit The credit amount
-    //audit-info @mody why create a new position when exisiting an existing one. 
-    //audit-info @mody now there are 2 credit positions for one single debt position
+    //audit-ok @mody why create a new position when exisiting an existing one. 
+    //audit-ok @mody now there are 2 credit positions for one single debt position
     function createCreditPosition(State storage state, uint256 exitCreditPositionId, address lender, uint256 credit)
         external
     {
@@ -119,7 +119,7 @@ library AccountingLibrary {
             );
         } else {
             uint256 debtPositionId = exitCreditPosition.debtPositionId;
-            //audit Reduce the credit value from the CreditPosition but doesn't also update the futureValue from DebtPosition
+            //audit-ok Reduce the credit value from the CreditPosition but doesn't also update the futureValue from DebtPosition
             reduceCredit(state, exitCreditPositionId, credit);
 
             CreditPosition memory creditPosition =
