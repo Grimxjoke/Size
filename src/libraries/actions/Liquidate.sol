@@ -79,16 +79,19 @@ library Liquidate {
 
         // profitable liquidation
         if (assignedCollateral > debtInCollateralToken) {
+            
+            //audit Will probably always choose the second value at it's in 1e6.
             uint256 liquidatorReward = Math.min(
+                //audit First is in 1e18
                 assignedCollateral - debtInCollateralToken,
+                //audit Second is in 1e6
                 Math.mulDivUp(debtPosition.futureValue, state.feeConfig.liquidationRewardPercent, PERCENT)
+                // liquidationRewardPercent set to 5% in script/deploy.sol -> 0.05e18
             );
             liquidatorProfitCollateralToken = debtInCollateralToken + liquidatorReward;
 
             // split the remaining collateral between the protocol and the borrower, capped by the crLiquidation
-            //audit @paul No Underflow possible here ? 
-            //audit @paul Can User lower the assignedCollateral to make the liquidate function revert ? 
-            // audit @mody check into front running the liquidate call and only increading collateral to make the collateral + reward revert on the following line
+            //audit-ok  @paul No Underflow possible here ? The wost that can happen is to be 0 but cannot get lower  
             uint256 collateralRemainder = assignedCollateral - liquidatorProfitCollateralToken;
 
             // cap the collateral remainder to the liquidation collateral ratio
@@ -97,16 +100,18 @@ library Liquidate {
                 Math.mulDivDown(debtInCollateralToken, state.riskConfig.crLiquidation, PERCENT);
 
             collateralRemainder = Math.min(collateralRemainder, collateralRemainderCap);
-            //audit-issue Should be mulDivUp as it's from the borrower to the Size protocol. In favor of the protocol
+            //audit-issue @paul Should be mulDivUp as it's from the borrower to the Size protocol. In favor of the protocol
             protocolProfitCollateralToken = Math.mulDivDown(collateralRemainder, collateralProtocolPercent, PERCENT);
         } else {
             // unprofitable liquidation
             liquidatorProfitCollateralToken = assignedCollateral;
         }
 
+        //note The Liquidator repay the Borrower debt to Size
         state.data.borrowAToken.transferFrom(msg.sender, address(this), debtPosition.futureValue);
+        //note The Borrower send part of his collateral to the liquidator 
         state.data.collateralToken.transferFrom(debtPosition.borrower, msg.sender, liquidatorProfitCollateralToken);
-        //audit @mody. sometimes, this will be 0 amount, will it revert? doesn't seem like it https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
+        //audit-ok @mody. sometimes, this will be 0 amount, will it revert? doesn't seem like it https://github.com/OpenZeppelin/openzeppelin-contracts/blob/master/contracts/token/ERC20/ERC20.sol
         state.data.collateralToken.transferFrom(
             debtPosition.borrower, state.feeConfig.feeRecipient, protocolProfitCollateralToken
         );

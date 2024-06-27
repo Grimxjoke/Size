@@ -304,7 +304,7 @@ contract Size is ISize, SizeView, Initializable, AccessControlUpgradeable, Pausa
     ///     - uint256 creditPositionId: The id of the credit position to self-liquidate
     //audit-ok @mody, what if the caller has a credit position to issue a loan and that loan get liquidated due to the other borrower having low collateral. what happens in that case? 
     //audit-ok @mody the comment above mentioned that the self liquidate should fail if the normal liquidation is profitable. I don't see this calculation checking whether it is profitable or not
-    //audit-issue Same as Liquidate, this function should have a 100% uptime, It's even more crutial as it's already underwater when called
+    //audit-issue @paul Same as Liquidate, this function should have a 100% uptime, It's even more crutial as it's already underwater when called
     function selfLiquidate(SelfLiquidateParams calldata params) external payable override(ISize) whenNotPaused {
         state.validateSelfLiquidate(params);
         state.executeSelfLiquidate(params);

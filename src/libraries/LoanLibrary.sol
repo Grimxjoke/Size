@@ -154,8 +154,6 @@ library LoanLibrary {
         uint256 collateral = state.data.collateralToken.balanceOf(debtPosition.borrower);
 
         if (debt != 0) {
-            //audit-ok To confirm with Mody No need to scaled debt token as the decimal gets deleted anyway 
-            //check docs :  https://docs.size.credit/technical-docs/contracts/3.5-liquidations#id-3.5.1-automatic-collateral-assignment
             return Math.mulDivDown(collateral, debtPosition.futureValue, debt);
         } else {
             return 0;

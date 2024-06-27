@@ -138,9 +138,10 @@ library YieldCurveLibrary {
                 uint256 y1 =
                     getAdjustedAPR(curveRelativeTime.aprs[high], curveRelativeTime.marketRateMultipliers[high], params);
                 if (y1 >= y0) {
-                    //audit-info Ask for confirmation to Mody - & + 
+                    //audit-info For regular Yield Curve 
                     return y0 + Math.mulDivDown(y1 - y0, tenor - x0, x1 - x0);
                 } else {
+                    //audit-info For inverted Yield Curve, y0>y1 meaning a long term loan is cheaper than a short term 
                     //audit Make sure that y0 is greater or it will revert. 
                     return y0 - Math.mulDivDown(y0 - y1, tenor - x0, x1 - x0);
                 }
