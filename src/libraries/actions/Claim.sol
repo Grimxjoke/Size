@@ -40,6 +40,11 @@ library Claim {
         }
         if (creditPosition.credit == 0) {
             revert Errors.CREDIT_POSITION_ALREADY_CLAIMED(params.creditPositionId);
+
+           //gas
+           //warn
+           //todo
+           //review
         }
     }
 

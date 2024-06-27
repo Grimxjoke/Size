@@ -112,9 +112,6 @@ library Liquidate {
         );
 
         debtPosition.liquidityIndexAtRepayment = state.data.borrowAToken.liquidityIndex();
-        //audit-issue The function never actually update the LoanStatus to "REPAID"
-        //audit-issue The Lender won't be able to claim the Borrow Amount as it need the Status to be "REPAID"
-        //note see Claim.sol::validateClaim()
         state.repayDebt(params.debtPositionId, debtPosition.futureValue);
     }
 
