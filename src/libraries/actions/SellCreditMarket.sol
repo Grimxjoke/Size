@@ -248,8 +248,6 @@ library SellCreditMarket {
         }
 
         state.createCreditPosition({
-            //audit-info @paul : 1) Why de-crement the next credit position Id instead of Increment in a case of id == RESERVED_ID?
-            //        2) Why let the arbitrary credit position Id from input ? Might no be correct
             exitCreditPositionId: params.creditPositionId == RESERVED_ID
                 ? state.data.nextCreditPositionId - 1
                 : params.creditPositionId,
@@ -262,7 +260,6 @@ library SellCreditMarket {
             msg.sender,
             cashAmountOut
         );
-        //audit-info @paul Why does the Lender as to pay fees ?
         state.data.borrowAToken.transferFrom(
             params.lender,
             state.feeConfig.feeRecipient,
