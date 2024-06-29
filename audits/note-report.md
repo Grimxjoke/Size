@@ -6,7 +6,7 @@ eg: 5.1.2 Potential reverse market where USDC -> Collateral & WETH -> Borrow Tok
 
 5.1.1 : 
 Make sure that all borrowing and exiting functions enforce the repayment of fees, particularly focusing on any mechanisms for exiting debt positions or creating market orders.
-Make sure  that fees are calculated based on the faceValue (or another stable, appropriate metric) rather than issuanceValue to prevent manipulation.
+Make sure  that fees are calculated based on the faceValue rather than issuanceValue to prevent manipulation.
 Make sure that the system correctly handles multiple accounts and collateral transfers, preventing borrowers from using secondary accounts to reduce or avoid fees.
 
 5.1.2 : 
