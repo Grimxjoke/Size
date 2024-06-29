@@ -3,8 +3,9 @@ pragma solidity 0.8.23;
 
 import {UserView} from "@src/SizeView.sol";
 import {DepositParams} from "@src/libraries/actions/Deposit.sol";
-import {BaseTest} from "@test/BaseTest.sol";
+import {Vars, BaseTest} from "@test/BaseTest.sol";
 import "forge-std/console.sol";
+import {Math, PERCENT} from "@src/libraries/Math.sol";
 
 import {Errors} from "@src/libraries/Errors.sol";
 import {RESERVED_ID} from "@src/libraries/LoanLibrary.sol";
