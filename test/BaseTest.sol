@@ -408,4 +408,28 @@ contract BaseTest is Test, Deploy, AssertsHelper {
         vm.prank(address(this));
         PoolMock(address(variablePool)).setLiquidityIndex(address(usdc), index);
     }
+
+     function sellCreditMarket(
+        address borrower,
+        address lender,
+        uint256 creditPositionId,
+        uint256 amount,
+        uint256 tenor,
+        bool exactAmountIn
+    ) external returns (uint256) {
+        vm.prank(borrower);
+        size.sellCreditMarket(
+            SellCreditMarketParams({
+                lender: lender,
+                creditPositionId: creditPositionId,
+                amount: amount,
+                tenor: tenor,
+                deadline: block.timestamp,
+                maxAPR: type(uint256).max,
+                exactAmountIn: exactAmountIn
+            })
+        );
+        (uint256 debtPositionsCount,) = size.getPositionsCount();
+        return DEBT_POSITION_ID_START + debtPositionsCount - 1;
+    }
 }
