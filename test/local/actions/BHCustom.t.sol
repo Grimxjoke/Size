@@ -25,7 +25,6 @@ contract BHCustom is BaseTest {
    
    function test_limit_order_not_backed_by_collateral_failing() public{
       
-      // _deposit(alice, usdc, 200e6);
       _deposit(bob, weth, 100e18);
       _deposit(candy, weth, 100e18);
       console.log("Alice places an order in the order book. Uncollateralized.");
