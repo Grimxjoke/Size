@@ -102,8 +102,6 @@ library Liquidate {
             liquidatorProfitCollateralToken = debtInCollateralToken + liquidatorReward;
 
             // split the remaining collateral between the protocol and the borrower, capped by the crLiquidation
-            //audit @paul No Underflow possible here ? 
-            //audit @paul Can User lower the assignedCollateral to make the liquidate function revert ? 
             // audit-ok @mody check into front running the liquidate call and only increading collateral to make the collateral + reward revert on the following line
             uint256 collateralRemainder = assignedCollateral - liquidatorProfitCollateralToken;
 
@@ -113,7 +111,7 @@ library Liquidate {
                 Math.mulDivDown(debtInCollateralToken, state.riskConfig.crLiquidation, PERCENT);
 
             collateralRemainder = Math.min(collateralRemainder, collateralRemainderCap);
-
+            //audit The protocol profits should be round Up 
             protocolProfitCollateralToken = Math.mulDivDown(collateralRemainder, collateralProtocolPercent, PERCENT);
         } else {
             // unprofitable liquidation

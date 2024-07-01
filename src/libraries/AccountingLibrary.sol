@@ -286,7 +286,6 @@ library AccountingLibrary {
         uint256 ratePerTenor,
         uint256 tenor
     ) internal view returns (uint256 creditAmountOut, uint256 fees) {
-        //audit What the matter in this scenario ? 
         if (cashAmountIn == maxCashAmountIn) {
             // no credit fractionalization
 
@@ -304,7 +303,6 @@ library AccountingLibrary {
 
             uint256 netCashAmountIn = cashAmountIn - state.feeConfig.fragmentationFee;
 
-            //audit Why (PERCENT + ratePerTenor)
             creditAmountOut = Math.mulDivDown(netCashAmountIn, PERCENT + ratePerTenor, PERCENT);
             //audit-issue The fragmentation fees are calulated twice . 1 on the creditAmount Out 2) on the fees variables
             fees = getSwapFee(state, netCashAmountIn, tenor) + state.feeConfig.fragmentationFee;
