@@ -176,7 +176,7 @@ There are a few options to mitigate:
 - Allow collateralized limit orders only
 
 
-# M1 loan and borrow offers are not being reset after the user deposit has been used for lending/borrowing leaving stake orders on the order book
+# M1 loan and borrow offers are not being reset after the user deposit has been used for lending/borrowing leaving stale orders on the order book
 Once a legitimate user adds a loan or borrow offer to the order book, other users can user the market order functions to fulfill that order. Once a user deposit has been consumed to fulfill other orders, the offer still reamins in the order book, creating stale orders which cannot be fulfilled. 
 
 ## POC
