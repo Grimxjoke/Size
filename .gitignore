@@ -37,4 +37,4 @@ crytic-export
 echidna
 
 # Libraries 
-lib
+lib/
