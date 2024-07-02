@@ -1,7 +1,9 @@
 # Liquidate & Self-Liquidate Should Have 100% Uptime
 
+
 ## Impact
-Lenders can lose funds if the borrower's collateral is dropping when the protocol is paused.
+Lenders can lose funds if the borrower's collateral drops when the protocol is paused.
+
 
 ## Proof of Concept
 
@@ -20,7 +22,7 @@ Lenders can lose funds if the borrower's collateral is dropping when the protoco
     * crLiquidation = 1.3
 
 * Protocol pauses the Size contract for any reason.
-* Bob's collateral drops further and is open for liquidation but his position can't be liquidated due to the modifier.
+* Bob's collateral drops further and is open for liquidation, but his position can't be liquidated due to the modifier.
 
 If the ETH price continues to drop and reaches 2665 USD/ETH, Bob is now undercollateralized and Alice can't call the Self-Liquidation function either.
 
@@ -32,14 +34,13 @@ Manual Review
 
 ## Recommended Mitigation Steps
 
-* Remove the `whenNotPaused` modifier in the `Liquidate` and `SelfLiquidate` functions.
-* Create a different modifier to pause the liquidate and self-liquidate functions (for emergencies). This way, if the protocol is paused, creditors can still self-liquidate.
-
-### Links to Affected Code (to include directly in the Code4rena Submit page)
-* https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/Size.sol#L210
-* https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/Size.sol#L223
+* Remove the `whenNotPaused` modifier in the [liquidate](https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/Size.sol#L210) and [selfLiquidate](https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/Size.sol#L223) functions.
+* Create a different modifier to pause those functions (for emergencies). This way, if the protocol is paused, liquidators can liquidate a liquidatable position and lenders can still self-liquidate before they lose too much credit
 
 
+
+https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/Size.sol#L210
+https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/Size.sol#L223
 
 
 
@@ -47,25 +48,9 @@ Manual Review
 
 The loan APR affects how much the borrower is expected to pay to the lender. In the following examples, the APR is calculated using the `mulDivDown` function. This favors the borrower instead of the lender.
 
-## First Example
-`Liquidate.sol::executeLiquidate`
-- [Liquidate.sol#L112](https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/libraries/actions/Liquidate.sol#L112)
 
-```solidity
-    protocolProfitCollateralToken = Math.mulDivDown(collateralRemainder, collateralProtocolPercent, PERCENT);
-    ...
-    state.data.collateralToken.transferFrom(debtPosition.borrower, state.feeConfig.feeRecipient, protocolProfitCollateralToken);
-```
-
-## Second Example
-`YieldCurveLibrary::getAPR`
-- `getApr` will return this value if `y0 > y1`:
-```solidity
-    protocolProfitCollateralToken = Math.mulDivDown(collateralRemainder, collateralProtocolPercent, PERCENT);
-    ...
-    state.data.collateralToken.transferFrom(debtPosition.borrower, state.feeConfig.feeRecipient, protocolProfitCollateralToken);
-```
-- `return y0 + Math.mulDivDown(y1 - y0, tenor - x0, x1 - x0);`
+[getAPR](https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/libraries/YieldCurveLibrary.sol#L115-L143) will return this value if `y0 > y1`:
+*  `y0 + Math.mulDivDown(y1 - y0, tenor - x0, x1 - x0);`
 
 However, as this is an APR calculation, a lower APR will be beneficial for the borrower.
 
@@ -75,25 +60,50 @@ Manual Review
 ## Recommended Mitigation Steps
 Use `mulDivUp` when calculating the APR.
 
-### First Example
-Set the `protocolProfitCollateralToken` to:
-- `protocolProfitCollateralToken = Math.mulDivUp(collateralRemainder, collateralProtocolPercent, PERCENT);`
+``` diff
+- return y0 + Math.mulDivDown(y1 - y0, tenor - x0, x1 - x0);
++ return y0 + Math.mulDivUp(y1 - y0, tenor - x0, x1 - x0);
+```
 
-### Second Example
-Set the return value to:
-- `return y0 + Math.mulDivUp(y1 - y0, tenor - x0, x1 - x0);`
-
+https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/libraries/YieldCurveLibrary.sol#L115-L143
 
 
 
+# Protocol Profits Should Round in Favor of the Protocol and Not the Liquidated Borrower
 
-# M1 Users Can Place Offers That Are Never Collateralized, Leading to Many Dirty Orders in the Order Book
-The protocol allows users to add limit orders without collateral. A bad actor, using multiple wallets, can create fake and appealing lending/borrowing offers. This will create many highly appealing orders in the order book which will fail during fulfillment when calling the create sell/buy market orders functions. This will lead to a very bad user experience and create a semi-DOS effect on the system.
+In the [executeLiquidate](https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/libraries/actions/Liquidate.sol#L112), the protocol liquidation profit token is rounded in favor of the borrower instead of the protocol itself. 
+It should always be in favor of the protocol
+```solidity
+    protocolProfitCollateralToken = Math.mulDivDown(collateralRemainder, collateralProtocolPercent, PERCENT);
+    ...
+    state.data.collateralToken.transferFrom(debtPosition.borrower, state.feeConfig.feeRecipient, protocolProfitCollateralToken);
+```
+
+
+## Tools Used
+Manual Review
+
+## Recommended Mitigation Steps
+* Round Up the calculation
+```diff
+- protocolProfitCollateralToken = Math.mulDivDown(collateralRemainder, collateralProtocolPercent, PERCENT);
++ protocolProfitCollateralToken = Math.mulDivUp(collateralRemainder, collateralProtocolPercent, PERCENT);
+```
+
+https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/libraries/actions/Liquidate.sol#L112
+
+
+
+
+
+
+# Users Can Place Offers That Are Never Collateralized, Leading to Many Dirty Orders in the Order Book
+The protocol allows users to add limit orders without collateral. A bad actor, using multiple wallets, can create fake and appealing lending/borrowing offers. This will create many highly appealing orders in the order book, which will fail during fulfillment when calling the create sell/buy market orders functions. This will lead to a very bad user experience and create a semi-DOS effect on the system.
 
 
 ## POC
 
-<details><summary>  See tests </summary>
+<details><summary>See test</summary>
   
 ```solidity
 function test_limit_order_not_backed_by_collateral_failing() public{
@@ -150,9 +160,6 @@ function test_limit_order_not_backed_by_collateral_failing() public{
          result=false;
       }
       assertEq(result,false);
-
-
-
    }
 ```
 </details>
@@ -168,14 +175,17 @@ There are a few options to mitigate:
 - Implement a mechanism to blacklist bad actors.
 - Allow collateralized limit orders only.
 
+https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/libraries/actions/SellCreditMarket.sol
 
-# Loan and Borrow Offers Are Not Being Reset After the User Deposit Has Been Used, Leaving Stale Orders on the Order Book
+
+
+# Loan and Borrow Offers Are Not Being Reset After the User Deposit Has Been Used, Leaving Stale Orders on the Order Book.
 
 Once a legitimate user adds a loan or borrow offer to the order book, other users can use the market order functions to fulfill that order. Once a user's deposit has been consumed to fulfill other orders, the offer still remains in the order book, creating stale orders which cannot be fulfilled.
 
 ## POC
 
-<details><summary>  See tests </summary>
+<details><summary>  See test </summary>
 
 ```solidity
  function test_orders_not_being_cleared_after_fulfillment_failing()public{
@@ -240,9 +250,6 @@ Once a legitimate user adds a loan or borrow offer to the order book, other user
          result=false;
       }
       assertEq(result,false);
-
-
-
    }
 ```
 </details>
@@ -255,6 +262,10 @@ Manual Review
 There are different mitigation options:
 - Update the order book to remove stale orders.
 - Use the UI to show how much a user can lend/borrow based on their deposited collateral.
+
+
+https://github.com/code-423n4/2024-06-size/blob/8850e25fb088898e9cf86f9be1c401ad155bea86/src/libraries/actions/SellCreditMarket.sol
+
 
 
 
